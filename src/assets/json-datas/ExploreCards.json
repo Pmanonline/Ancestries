@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "image": "../../public/images/exploreImage1.jpg",
+
+    "description": "Corem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eu turpis molestie, dictum est a, Corem ipsum dolor sit amet, consectetur adipiscing elit.",
+    "buttonText": "Explore",
+    "logo": "logo here1"
+  },
+  {
+    "id": 2,
+    "image": "../../public/images/exploreImage1.jpg",
+    "description": "Another hero's journey that is quite fascinating and worth exploring.",
+    "buttonText": "Learn More",
+    "logo": "logo here2"
+  },
+  {
+    "id": 3,
+    "image": "../../public/images/exploreImage1.jpg",
+    "description": " Get evidence of existance and visibility for every one and friends and family and dissolve every form of doubt by studying on thiss people...",
+    "buttonText": "Discover",
+    "logo": "logo here3"
+  },
+  {
+    "id": 4,
+    "image": "../../public/images/exploreImage1.jpg",
+    "description": " Get evidence of existance and visibility for every one and friends and family and dissolve every form of doubt by studying on thiss people...",
+    "buttonText": "Travel",
+    "logo": "logo here4"
+  },
+  {
+    "id": 5,
+    "image": "../../public/images/exploreImage1.jpg",
+    "description": " Get evidence of existance and visibility for every one and friends and family and dissolve every form of doubt by studying on thiss people...",
+    "buttonText": "Unlock",
+    "logo": "logo here5"
+  }
+]

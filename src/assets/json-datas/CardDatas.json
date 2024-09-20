@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "image": "../../public/images/exploreImage.png",
+    "title": "Know your ",
+    "description": "Every hero has a story and behind that story is the birthing of what made them who and what they are",
+    "buttonText": "Explore"
+  },
+  {
+    "id": 2,
+    "image": "../../public/images/exploreImage.png",
+    "title": "Know your ",
+    "description": "Discover the journey of another hero and what made them extraordinary.",
+    "buttonText": "Learn More"
+  }
+]

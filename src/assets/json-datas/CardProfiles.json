@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "name": "Ayobamikale James",
+    "position": "CEO x-oil",
+    "gender": "Male",
+    "image": "../../public/images/profileImage.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Jane Doe",
+    "position": "CTO TechCorp",
+    "gender": "Female",
+    "image": "../../public/images/profileImage.jpg"
+  },
+  {
+    "id": 3,
+    "name": "John Smith",
+    "position": "Lead Developer",
+    "gender": "Male",
+    "image": "../../public/images/profileImage.jpg"
+  },
+  {
+    "id": 4,
+    "name": "Emily Johnson",
+    "position": "Marketing Manager",
+    "gender": "Female",
+    "image": "../../public/images/profileImage.jpg"
+  }
+]
