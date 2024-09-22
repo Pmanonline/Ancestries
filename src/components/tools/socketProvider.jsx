@@ -7,8 +7,21 @@ const SocketContext = createContext();
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
 
+  // useEffect(() => {
+  //   const socketIo = io("http://localhost:8080");
+  //   setSocket(socketIo);
+
+  //   return () => {
+  //     socketIo.disconnect();
+  //   };
+  // }, []);
   useEffect(() => {
-    const socketIo = io("http://localhost:8080");
+    const backendURL =
+      import.meta.env.MODE === "production"
+        ? import.meta.env.VITE_BACKEND_URL
+        : "http://localhost:8080";
+
+    const socketIo = io(backendURL);
     setSocket(socketIo);
 
     return () => {

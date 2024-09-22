@@ -5,9 +5,9 @@ import { fetchStateDetails } from "../features/Statefeature/stateAction";
 import Spinner from "../components/tools/Spinner";
 import { DirectionButton2 } from "../components/d-button";
 const backendURL =
-  process.env.NODE_ENV !== "production"
-    ? "http://localhost:8080"
-    : "https://gekoda-api.onrender.com";
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_BACKEND_URL
+    : "http://localhost:8080";
 
 function Genealogy() {
   const { stateName } = useParams();

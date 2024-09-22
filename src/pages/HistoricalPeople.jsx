@@ -8,9 +8,10 @@ import { DirectionButton2 } from "../components/d-button";
 
 const HistoricalPeople = () => {
   const backendURL =
-    process.env.NODE_ENV !== "production"
-      ? "http://localhost:8080"
-      : "https://gekoda-api.onrender.com";
+    import.meta.env.MODE === "production"
+      ? import.meta.env.VITE_BACKEND_URL
+      : "http://localhost:8080";
+
   const dispatch = useDispatch();
   const { historicalPeople, loading, error } = useSelector(
     (state) => state.historicalPeople

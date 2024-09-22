@@ -25,9 +25,9 @@ import {
 import FatherForm from "../../components/Forms/FathersForm";
 
 const backendURL =
-  process.env.NODE_ENV !== "production"
-    ? "http://localhost:8080"
-    : "https://gekoda-api.onrender.com";
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_BACKEND_URL
+    : "http://localhost:8080";
 
 const style = {
   position: "absolute",

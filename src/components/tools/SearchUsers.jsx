@@ -13,9 +13,9 @@ import NoResult from "../../assets/images/noResult.png";
 import Search from "../../assets/images/Search.gif";
 
 const backendURL =
-  process.env.NODE_ENV !== "production"
-    ? "http://localhost:8080"
-    : "https://your-backend-url";
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_BACKEND_URL
+    : "http://localhost:8080";
 
 export default function SearchUsers() {
   const [firstName, setFirstName] = useState("");

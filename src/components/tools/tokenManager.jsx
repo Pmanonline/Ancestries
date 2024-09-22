@@ -2,7 +2,10 @@
 
 import axios from "axios";
 
-const apiUrl = "http://localhost:8080"; // Update with your backend URL if different
+const apiUrl =
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_BACKEND_URL
+    : "http://localhost:8080"; // Update with your backend URL if different
 
 export const getAccessToken = () => {
   return localStorage.getItem("accessToken");

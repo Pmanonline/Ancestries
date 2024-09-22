@@ -25,9 +25,9 @@ const HistoricalModal = ({ open, onClose, person }) => {
   if (!open) return null; // Return null if modal is not open
 
   const backendURL =
-    process.env.NODE_ENV !== "production"
-      ? "http://localhost:8080"
-      : "https://gekoda-api.onrender.com";
+    import.meta.env.MODE === "production"
+      ? import.meta.env.VITE_BACKEND_URL
+      : "http://localhost:8080";
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 mod:mx-3 px-3 ">

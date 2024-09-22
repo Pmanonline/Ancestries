@@ -34,9 +34,9 @@ import { ChatContext } from "../../components/context/chatContext";
 import { sendConnectionRequest } from "../../features/connectionFeature/connectionAction";
 
 const backendURL =
-  process.env.NODE_ENV !== "production"
-    ? "http://localhost:8080"
-    : "https://gekoda-api.onrender.com";
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_BACKEND_URL
+    : "http://localhost:8080";
 
 function ChildFeed(chat) {
   const dispatch = useDispatch();

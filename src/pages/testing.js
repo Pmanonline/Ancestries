@@ -1,221 +1,339 @@
- import React, { useState, useRef, useEffect } from "react";
- import { useSelector } from "react-redux";
- import { useParams, useNavigate } from "react-router-dom";
- import { useDispatch } from "react-redux";
- import { fetchAllDetails } from "../features/UserFeature/UserAction";
- import { fetchUserInvites } from "../features/UserFeature/inviteAction";
- import { FiZoomOut, FiZoomIn } from "react-icons/fi";
- import { MdOutlineZoomInMap } from "react-icons/md";
- import { FaEllipsisV, FaTrash } from "react-icons/fa";
- import {
-   Card,
-   CardHeader,
-   CardContent,
-   CardActions,
-   Avatar,
-   IconButton,
-   Typography,
-   Button,
-   Menu,
-   MenuItem,
-   Dialog,
-   DialogTitle,
-   DialogContent,
-   DialogContentText,
-   DialogActions,
- } from "@mui/material";
+import React, { useState, useEffect, useRef } from "react";
+import { NavLink, Link, useLocation } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { logoutUser } from "../features/auth/authSlice";
+import { getProfile } from "../features/UserFeature/UserAction";
+import NotificationBar from "../components/chats/Notifications";
+import { IoPersonCircleOutline } from "react-icons/io5";
+import { FaChevronDown } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 
- export const FamilyTreeStructure = () => {
-   const invites = useSelector((state) => state.invite.invites);
-   const loading = useSelector((state) => state.invite.loading);
-   const error = useSelector((state) => state.invite.error);
-   const { userId } = useParams();
-   const dispatch = useDispatch();
-   const [scale, setScale] = useState(1);
-   const [dragging, setDragging] = useState(false);
-   const [position, setPosition] = useState({ x: 0, y: 0 });
-   const treeContentRef = useRef(null);
-   const startPos = useRef({ x: 0, y: 0 });
+function Navbar() {
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
+  const [userOpen, setUserOpen] = useState(false);
+  const [isFamilyTreeOpen, setIsFamilyTreeOpen] = useState(false);
 
-   useEffect(() => {
-     if (userId) {
-       dispatch(fetchAllDetails(userId));
-       dispatch(fetchUserInvites(userId));
-     }
-   }, [dispatch, userId]);
+  const menuRef = useRef(null);
+  const userDropdownRef = useRef(null);
+  const familyTreeDropdownRef = useRef(null);
 
-   // ... (keep all the existing functions like handleMouseDown, handleZoomIn, etc.)
+  const { user } = useSelector((state) => state.auth);
+  const userId = user?.id;
 
-   return (
-     <>
-       {/* ... (keep all the existing zoom controls and family tree structure) */}
+  useEffect(() => {
+    if (userId) {
+      dispatch(getProfile(userId));
+    }
+  }, [userId, dispatch]);
 
-       {/* My Relations Tree */}
-       <div className="mt-20">
-         <div
-           ref={treeContentRef}
-           onMouseDown={handleMouseDown}
-           onMouseMove={handleMouseMove}
-           onMouseUp={handleMouseUp}
-           onMouseLeave={handleMouseUp}
-           style={{
-             transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-             transition: dragging ? "none" : "transform 0.1s ease-in-out",
-           }}
-           className="flex flex-col cursor-grab items-center"
-         >
-           <div className="family-tree-container">
-             <div className="invites-section">
-               <h2 className="text-2xl font-bold text-center mb-24">
-                 Other Relations
-               </h2>
-               {loading ? (
-                 <p>Loading...</p>
-               ) : error ? (
-                 <p>
-                   Unable to load relations at this time. Please try again
-                   later.
-                 </p>
-               ) : invites && invites.length > 0 ? (
-                 <div className="flex justify-center">
-                   {invites.map((invite, index) => (
-                     <div key={invite._id || index} className="mx-4 relative">
-                       <InviteCard invite={invite} />
-                       {/* Vertical line */}
-                       <div className="absolute top-0 left-1/2 w-px h-8 bg-gray-300 -translate-x-1/2 -translate-y-full"></div>
-                       {/* Horizontal line */}
-                       {index > 0 && (
-                         <div className="absolute top-0 left-0 w-full h-px bg-gray-300 -translate-y-8"></div>
-                       )}
-                     </div>
-                   ))}
-                 </div>
-               ) : (
-                 <p>No relations found.</p>
-               )}
-             </div>
-           </div>
-         </div>
-       </div>
-     </>
-   );
- };
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location]);
 
- const InviteCard = ({ invite }) => {
-   const [anchorEl, setAnchorEl] = useState(null);
-   const [deleteOpen, setDeleteOpen] = useState(false);
-   const navigate = useNavigate();
+  const toggleMenu = () => setIsOpen(!isOpen);
+  const closeMenu = () => {
+    setIsOpen(false);
+    setIsFamilyTreeOpen(false);
+  };
 
-   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
-   const handleMenuClose = () => setAnchorEl(null);
-   const handleDeleteOpen = () => {
-     handleMenuClose();
-     setDeleteOpen(true);
-   };
-   const handleDeleteClose = () => setDeleteOpen(false);
+  const toggleFamilyTreeMenu = () => setIsFamilyTreeOpen(!isFamilyTreeOpen);
+  const toggleUserFile = () => setUserOpen(!userOpen);
 
-   const handleDelete = () => {
-     console.log("Delete invite", invite.id);
-     handleDeleteClose();
-   };
+  const handleClickOutside = (event) => {
+    if (
+      menuRef.current &&
+      !menuRef.current.contains(event.target) &&
+      !userDropdownRef.current?.contains(event.target) &&
+      !familyTreeDropdownRef.current?.contains(event.target)
+    ) {
+      closeMenu();
+      setUserOpen(false);
+      setIsFamilyTreeOpen(false);
+    }
+  };
 
-   const invitee = invite?.invitee || {};
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
-   const handleViewProfile = () => {
-     if (invitee._id) {
-       navigate(`/familyTree-feeds/${invitee._id}`);
-     } else {
-       console.error("User ID is not available");
-     }
-   };
+  const handleLogout = () => {
+    dispatch(logoutUser());
+  };
 
-   if (!invitee || !invitee.firstName) {
-     return null; // Don't render the card if invitee data is missing
-   }
+  const menuVariants = {
+    open: { opacity: 1, x: 0 },
+    closed: { opacity: 0, x: "-100%" },
+  };
 
-   return (
-     <Card sx={{ width: 180, m: 1 }}>
-       <CardHeader
-         avatar={
-           <Typography
-             variant="h6"
-             sx={{
-               width: 40,
-               height: 40,
-               borderRadius: "50%",
-               bgcolor: "primary.main",
-               color: "white",
-               display: "flex",
-               alignItems: "center",
-               justifyContent: "center",
-             }}
-           >
-             {`${invitee.firstName[0]}${
-               invitee.lastName ? invitee.lastName[0] : ""
-             }`}
-           </Typography>
-         }
-         action={
-           <IconButton
-             aria-label="settings"
-             onClick={handleMenuOpen}
-             size="small"
-           >
-             <FaEllipsisV />
-           </IconButton>
-         }
-         title={
-           <Typography variant="subtitle2">{`${invitee.firstName} ${
-             invitee.lastName || ""
-           }`}</Typography>
-         }
-         subheader={
-           <Typography variant="caption">
-             {invite.relationshipType || "Relation"}
-           </Typography>
-         }
-         sx={{ p: 1 }}
-       />
+  return (
+    <nav className="bg-white shadow-md">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex">
+            <Link to="/" className="flex-shrink-0 flex items-center">
+              <img
+                className="h-8 w-auto"
+                src="https://flowbite.com/docs/images/logo.svg"
+                alt="Logo"
+              />
+            </Link>
+          </div>
+          <div className="hidden md:ml-6 md:flex md:items-center md:space-x-4">
+            <NavLinks
+              isFamilyTreeOpen={isFamilyTreeOpen}
+              toggleFamilyTreeMenu={toggleFamilyTreeMenu}
+              familyTreeDropdownRef={familyTreeDropdownRef}
+            />
+          </div>
+          <div className="flex items-center">
+            <UserMenu user={user} handleLogout={handleLogout} userId={userId} />
+            <div className="md:hidden ml-2">
+              <motion.button
+                onClick={toggleMenu}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500"
+                aria-expanded="false"
+                whileTap={{ scale: 0.95 }}
+              >
+                <span className="sr-only">Open main menu</span>
+                <svg
+                  className={`${isOpen ? "hidden" : "block"} h-6 w-6`}
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+                <svg
+                  className={`${isOpen ? "block" : "hidden"} h-6 w-6`}
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </motion.button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-       <CardActions sx={{ justifyContent: "center", p: 1 }}>
-         <Button
-           size="small"
-           variant="outlined"
-           fullWidth
-           onClick={handleViewProfile}
-         >
-           View Profile
-         </Button>
-       </CardActions>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            ref={menuRef}
+            className="md:hidden"
+            initial="closed"
+            animate="open"
+            exit="closed"
+            variants={menuVariants}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+              <NavLinks
+                mobile
+                isFamilyTreeOpen={isFamilyTreeOpen}
+                toggleFamilyTreeMenu={toggleFamilyTreeMenu}
+                familyTreeDropdownRef={familyTreeDropdownRef}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </nav>
+  );
+}
 
-       <Menu
-         anchorEl={anchorEl}
-         open={Boolean(anchorEl)}
-         onClose={handleMenuClose}
-       >
-         <MenuItem onClick={handleDeleteOpen}>
-           <FaTrash fontSize="small" style={{ marginRight: "8px" }} />
-           Delete Invite
-         </MenuItem>
-       </Menu>
+function NavLinks({
+  mobile = false,
+  isFamilyTreeOpen,
+  toggleFamilyTreeMenu,
+  familyTreeDropdownRef,
+}) {
+  const linkClass = `${
+    mobile ? "block" : ""
+  } px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-green-500 hover:bg-gray-50 transition duration-150 ease-in-out`;
 
-       <Dialog open={deleteOpen} onClose={handleDeleteClose}>
-         <DialogTitle>Confirm Delete</DialogTitle>
-         <DialogContent>
-           <DialogContentText>
-             Are you sure you want to delete the invite for {invitee.firstName}{" "}
-             {invitee.lastName || ""}?
-           </DialogContentText>
-         </DialogContent>
-         <DialogActions>
-           <Button onClick={handleDeleteClose}>Cancel</Button>
-           <Button onClick={handleDelete} color="error">
-             Delete
-           </Button>
-         </DialogActions>
-       </Dialog>
-     </Card>
-   );
- };
+  return (
+    <>
+      <NavLink to="/" className={linkClass} end>
+        Home
+      </NavLink>
+      <NavLink to="/About" className={linkClass}>
+        About
+      </NavLink>
+      <NavLink to="/partners" className={linkClass}>
+        Our Partners
+      </NavLink>
+      <NavLink to="/name-meanings" className={linkClass}>
+        Name Meanings
+      </NavLink>
+      <div className="relative" ref={familyTreeDropdownRef}>
+        <button
+          onClick={toggleFamilyTreeMenu}
+          className={`${linkClass} flex items-center`}
+        >
+          Family Tree
+          <FaChevronDown className="ml-1" />
+        </button>
+        {isFamilyTreeOpen && (
+          <div className="absolute z-10 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+            <Link
+              to="/my-family-tree"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              My Family Tree
+            </Link>
+            <Link
+              to="/search-a-tree"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+            >
+              Search a Tree
+            </Link>
+          </div>
+        )}
+      </div>
+      <NavLink to="/genealogy" className={linkClass}>
+        Genealogy
+      </NavLink>
+      <NavLink to="/historicalPeople" className={linkClass}>
+        Historical People
+      </NavLink>
+      {mobile && <NotificationBar />}
+    </>
+  );
+}
 
- export default FamilyTreeStructure;
+function UserMenu({ user, handleLogout, userId }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleMenu = () => setIsOpen(!isOpen);
+
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  if (!user) {
+    return (
+      <div className="flex space-x-2">
+        <Link
+          to="/login"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+        >
+          Login
+        </Link>
+        <Link
+          to="/register"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-green-600 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+        >
+          Sign Up
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="ml-3 relative" ref={menuRef}>
+      <div>
+        <button
+          onClick={toggleMenu}
+          className="flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+          id="user-menu"
+          aria-expanded="false"
+          aria-haspopup="true"
+        >
+          <span className="sr-only">Open user menu</span>
+          <IoPersonCircleOutline className="h-8 w-8 rounded-full" />
+        </button>
+      </div>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5"
+            role="menu"
+            aria-orientation="vertical"
+            aria-labelledby="user-menu"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Link
+              to={`/profile/${userId}`}
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              role="menuitem"
+              onClick={() => setIsOpen(false)}
+            >
+              Your Profile
+            </Link>
+            <Link
+              to={`/view-tree/${userId}`}
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              role="menuitem"
+              onClick={() => setIsOpen(false)}
+            >
+              View Tree
+            </Link>
+            <Link
+              to="/chatPage"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              role="menuitem"
+              onClick={() => setIsOpen(false)}
+            >
+              Chat
+            </Link>
+            <Link
+              to="/MyConnections"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              role="menuitem"
+              onClick={() => setIsOpen(false)}
+            >
+              Connections
+            </Link>
+            <button
+              onClick={() => {
+                handleLogout();
+                setIsOpen(false);
+              }}
+              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              role="menuitem"
+            >
+              Sign out
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+export default Navbar;

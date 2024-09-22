@@ -25,9 +25,9 @@ import {
 import { ChevronRight } from "lucide-react";
 
 const backendURL =
-  process.env.NODE_ENV !== "production"
-    ? "http://localhost:8080"
-    : "https://your-backend-url";
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_BACKEND_URL
+    : "http://localhost:8080";
 
 export function SearchTree() {
   const [firstName, setFirstName] = useState("");
