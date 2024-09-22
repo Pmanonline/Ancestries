@@ -22,12 +22,6 @@ function Navbar() {
   const menuRef = useRef(null);
   const userDropdownRef = useRef(null);
   const familyTreeDropdownRef = useRef(null);
-  // const userInfo = useSelector((state) => state.auth);
-  // const { user, token } = useSelector((state) => state.auth);
-  // const userId = userInfo?.user?.id;
-
-  // console.log(userInfo, "userinfo from navbar");
-  // console.log(userId, "userId from navbar");
 
   const { user, token } = useSelector((state) => state.auth);
   const userId = user?.id;

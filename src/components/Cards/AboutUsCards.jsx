@@ -7,7 +7,7 @@ const AboutUsCard = () => {
       {AboutUsData.map((About) => (
         <div
           key={About.id}
-          className="overflow-hidden  bg-white bg-clip-border text-gray-700 shadow-lg max-w-[19.5rem] w-full lg:m-1 m-4 p-0"
+          className="overflow-hidden  bg-white bg-clip-border text-gray-700 shadow-lg  mid:max-w-[25.5rem]  max-w-[18.5rem] w-full lg:m-1 m-4 p-0"
         >
           {/* Image */}
           <div className="overflow-hidden bg-transparent shadow-none bg-clip-border">

@@ -9,10 +9,11 @@ import * as jwt_decode from "jwt-decode";
 axios.defaults.withCredentials = true;
 
 // Define your backend URL based on the environment
+
 const backendURL =
-  process.env.NODE_ENV !== "production"
-    ? "http://localhost:8080"
-    : "https://gekoda-api.onrender.com";
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_BACKEND_URL
+    : "http://localhost:8080";
 
 // Set up Axios to include credentials
 axios.defaults.withCredentials = true;
