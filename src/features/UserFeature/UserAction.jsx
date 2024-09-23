@@ -48,10 +48,138 @@ export const createFamilyMember = createAsyncThunk(
   }
 );
 
+// export const fetchAllDetails = createAsyncThunk(
+//   "person/fetchAllDetails",
+//   async (userId, { rejectWithValue }) => {
+//     console.log("userId before making requests:", userId);
+
+//     const token = localStorage.getItem("userToken");
+//     if (!token) {
+//       return rejectWithValue("No token found");
+//     }
+
+//     try {
+//       console.log(`Fetching details for userId: ${userId}`);
+//       // Array of fetch requests
+//       const fetchRequests = [
+//         axios.get(`${backendURL}/api/GetMother/${userId}`, {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }),
+//         axios.get(`${backendURL}/api/GetPerson/${userId}`, {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }),
+//         axios.get(`${backendURL}/api/GetFather/${userId}`, {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }),
+//         axios.get(`${backendURL}/api/GetPGFather/${userId}`, {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }),
+//         axios.get(`${backendURL}/api/GetPGMother/${userId}`, {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }),
+//         axios.get(`${backendURL}/api/GetMGFather/${userId}`, {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }),
+//         axios.get(`${backendURL}/api/GetMGMother/${userId}`, {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }),
+//         axios.get(`${backendURL}/api/get_MGrtGrandFather/${userId}`, {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }),
+//         axios.get(`${backendURL}/api/get_MGrtGrandMother/${userId}`, {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }),
+//         axios.get(`${backendURL}/api/get_PGrtGrandMother/${userId}`, {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }),
+//         axios.get(`${backendURL}/api/get_PGrtGrandFather/${userId}`, {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }),
+//       ];
+
+//       // Perform fetch requests and handle each individually
+//       const responses = await Promise.allSettled(fetchRequests);
+
+//       const result = responses.reduce(
+//         (acc, response, index) => {
+//           // Handling response based on status
+//           if (response.status === "fulfilled") {
+//             // Extract endpoint from index
+//             switch (index) {
+//               case 0:
+//                 acc.mother = response.value.data;
+//                 break;
+//               case 1:
+//                 acc.person = response.value.data;
+//                 break;
+//               case 2:
+//                 acc.father = response.value.data;
+//                 break;
+//               case 3:
+//                 acc.PGF = response.value.data;
+//                 break;
+//               case 4:
+//                 acc.PGM = response.value.data;
+//                 break;
+//               case 5:
+//                 acc.MGF = response.value.data;
+//                 break;
+//               case 6:
+//                 acc.MGM = response.value.data;
+//                 break;
+//               case 7:
+//                 acc.MGGF = response.value.data;
+//                 break;
+//               case 8:
+//                 acc.MGGM = response.value.data;
+//                 break;
+//               case 9:
+//                 acc.PGGM = response.value.data;
+//                 break;
+//               case 10:
+//                 acc.PGGF = response.value.data;
+//                 break;
+//               default:
+//                 break;
+//             }
+//           } else {
+//             // Handle individual fetch errors
+//             console.error(`Fetch error for request ${index}:`, response.reason);
+//           }
+//           return acc;
+//         },
+//         {
+//           mother: null,
+//           person: null,
+//           father: null,
+//           PGF: null,
+//           MGF: null,
+//           PGM: null,
+//           MGM: null,
+//           MGGF: null,
+//           MGGM: null,
+//           PGGM: null,
+//           PGGF: null,
+//         }
+//       );
+
+//       return result;
+//     } catch (error) {
+//       return rejectWithValue(error.message || "An error occurred");
+//     }
+//   }
+// );
+
 export const fetchAllDetails = createAsyncThunk(
   "person/fetchAllDetails",
-  async (userId, { rejectWithValue }) => {
-    console.log("userId before making requests:", userId);
+  async (userId, { getState, rejectWithValue }) => {
+    const state = getState().form.fetchDetails;
+    const THIRTY_MINUTES = 30 * 60 * 1000;
+
+    // Check if data is still valid
+    if (state.data && Date.now() - state.lastFetched < THIRTY_MINUTES) {
+      return state.data; // Return cached data
+    }
 
     const token = localStorage.getItem("userToken");
     if (!token) {
@@ -59,111 +187,44 @@ export const fetchAllDetails = createAsyncThunk(
     }
 
     try {
-      console.log(`Fetching details for userId: ${userId}`);
-      // Array of fetch requests
-      const fetchRequests = [
-        axios.get(`${backendURL}/api/GetMother/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${backendURL}/api/GetPerson/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${backendURL}/api/GetFather/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${backendURL}/api/GetPGFather/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${backendURL}/api/GetPGMother/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${backendURL}/api/GetMGFather/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${backendURL}/api/GetMGMother/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${backendURL}/api/get_MGrtGrandFather/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${backendURL}/api/get_MGrtGrandMother/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${backendURL}/api/get_PGrtGrandMother/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${backendURL}/api/get_PGrtGrandFather/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+      const endpoints = [
+        "GetMother",
+        "GetPerson",
+        "GetFather",
+        "GetPGFather",
+        "GetPGMother",
+        "GetMGFather",
+        "GetMGMother",
+        "get_MGrtGrandFather",
+        "get_MGrtGrandMother",
+        "get_PGrtGrandMother",
+        "get_PGrtGrandFather",
       ];
 
-      // Perform fetch requests and handle each individually
-      const responses = await Promise.allSettled(fetchRequests);
-
-      const result = responses.reduce(
-        (acc, response, index) => {
-          // Handling response based on status
-          if (response.status === "fulfilled") {
-            // Extract endpoint from index
-            switch (index) {
-              case 0:
-                acc.mother = response.value.data;
-                break;
-              case 1:
-                acc.person = response.value.data;
-                break;
-              case 2:
-                acc.father = response.value.data;
-                break;
-              case 3:
-                acc.PGF = response.value.data;
-                break;
-              case 4:
-                acc.PGM = response.value.data;
-                break;
-              case 5:
-                acc.MGF = response.value.data;
-                break;
-              case 6:
-                acc.MGM = response.value.data;
-                break;
-              case 7:
-                acc.MGGF = response.value.data;
-                break;
-              case 8:
-                acc.MGGM = response.value.data;
-                break;
-              case 9:
-                acc.PGGM = response.value.data;
-                break;
-              case 10:
-                acc.PGGF = response.value.data;
-                break;
-              default:
-                break;
-            }
-          } else {
-            // Handle individual fetch errors
-            console.error(`Fetch error for request ${index}:`, response.reason);
-          }
-          return acc;
-        },
-        {
-          mother: null,
-          person: null,
-          father: null,
-          PGF: null,
-          MGF: null,
-          PGM: null,
-          MGM: null,
-          MGGF: null,
-          MGGM: null,
-          PGGM: null,
-          PGGF: null,
-        }
+      const fetchRequests = endpoints.map((endpoint) =>
+        axios.get(`${backendURL}/api/${endpoint}/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
       );
 
-      return result;
+      const responses = await Promise.allSettled(fetchRequests);
+
+      const result = responses.reduce((acc, response, index) => {
+        if (response.status === "fulfilled") {
+          const key = endpoints[index]
+            .replace(/^(Get|get_)/, "")
+            .replace(/^./, (c) => c.toLowerCase());
+          acc[key] = response.value.data;
+        } else {
+          console.error(
+            `Fetch error for ${endpoints[index]}:`,
+            response.reason
+          );
+        }
+        return acc;
+      }, {});
+
+      return { ...result, lastFetched: Date.now() };
     } catch (error) {
       return rejectWithValue(error.message || "An error occurred");
     }

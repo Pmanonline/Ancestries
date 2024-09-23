@@ -1,55 +1,32 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { AuthContext } from "../components/context/AuthContext";
 import { ChatContext } from "../components/context/chatContext";
 import UserChats from "../components/chats/userChats";
-import useFetchRecipientUser from "../components/Hooks/useFetchRecipient";
-import { PotentialChats } from "../components/chats/potentialChats";
 import ChatBox from "../components/chats/ChatBox";
 import "../App.css";
 
-import { AiOutlineClose, AiOutlineMail, AiOutlineMenu } from "react-icons/ai";
-import { FaGithub, FaLinkedinIn } from "react-icons/fa";
-import { BsFillPersonLinesFill } from "react-icons/bs";
-
-// Separate component to handle each chat item
-const ChatItem = ({ chat, user, onClick }) => {
-  const { recipientUser, error } = useFetchRecipientUser(chat);
-
-  if (error) {
-    console.log("Error fetching recipient user:", error);
-    return <p>Error loading recipient user</p>;
-  }
-
-  return (
-    <div className="chat" onClick={onClick}>
-      <UserChats chat={chat} user={user} recipientUser={recipientUser} />
-    </div>
-  );
-};
+const ChatItem = ({ chat, user, onClick }) => (
+  <div className="chat" onClick={onClick}>
+    <UserChats chat={chat} user={user} />
+  </div>
+);
 
 const ChatPage = () => {
   const { user } = useContext(AuthContext);
-  const { userChats, isUserChatsLoading, isUserChatsError, updateCurrentChat } =
-    useContext(ChatContext);
-  const [sortedChats, setSortedChats] = useState([]);
+  const {
+    userChats,
+    isUserChatsLoading,
+    isUserChatsError,
+    updateCurrentChat,
+    fetchChats,
+  } = useContext(ChatContext);
 
   useEffect(() => {
-    if (userChats) {
-      // Sort chats by the latest message time or fallback to updatedAt
-      const sorted = [...userChats].sort((a, b) => {
-        const dateA = new Date(
-          a.latestMessage?.createdAt || a.updatedAt
-        ).getTime();
-        const dateB = new Date(
-          b.latestMessage?.createdAt || b.updatedAt
-        ).getTime();
+    fetchChats();
+  }, [fetchChats]);
 
-        // Sort by the most recent timestamp
-        return dateB - dateA;
-      });
-
-      setSortedChats(sorted);
-    }
+  useEffect(() => {
+    console.log("Current userChats in ChatPage:", userChats);
   }, [userChats]);
 
   if (isUserChatsLoading) {
@@ -62,21 +39,18 @@ const ChatPage = () => {
 
   return (
     <section>
-      {/* <PotentialChats /> */}
-      {sortedChats.length > 0 ? (
+      {userChats.length > 0 ? (
         <div className="flex h-screen">
           <div className="w-[40%] bg-gray-100 p-2 mod:hidden">
-            {sortedChats.map((chat) => (
-              <div key={chat._id}>
-                <ChatItem
-                  chat={chat}
-                  user={user}
-                  onClick={() => updateCurrentChat(chat)} // Ensure chat is updated on click
-                />
-              </div>
+            {userChats.map((chat) => (
+              <ChatItem
+                key={chat._id}
+                chat={chat}
+                user={user}
+                onClick={() => updateCurrentChat(chat)}
+              />
             ))}
           </div>
-
           <div className="sm:w-[60%] w-full bg-white p-4">
             <ChatBox />
           </div>

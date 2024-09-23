@@ -1,339 +1,358 @@
-import React, { useState, useEffect, useRef } from "react";
-import { NavLink, Link, useLocation } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { logoutUser } from "../features/auth/authSlice";
-import { getProfile } from "../features/UserFeature/UserAction";
-import NotificationBar from "../components/chats/Notifications";
-import { IoPersonCircleOutline } from "react-icons/io5";
-import { FaChevronDown } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import axios from "axios";
+import Box from "@mui/material/Box";
+import Modal from "@mui/material/Modal";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import Spinner from "../../components/tools/Spinner";
+import { resetEditState } from "../../features/UserFeature/EditSlice";
+import { toast } from "react-toastify";
+import { resetDeleteState } from "../../features/UserFeature/deleteUserSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { RiImageAddFill } from "react-icons/ri";
+import { IoClose } from "react-icons/io5";
+import { AiTwotoneDelete } from "react-icons/ai";
+import { FaUserCircle } from "react-icons/fa";
+import { GrTreeOption } from "react-icons/gr";
+import {
+  fetchAllDetails,
+  deletePerson,
+  editPerson,
+} from "../../features/UserFeature/UserAction";
+import PersonalForm from "../../components/Forms/personalForm";
+import { invalidateCache } from "../../features/UserFeature/UserSlice";
 
-function Navbar() {
+const backendURL =
+  import.meta.env.MODE === "production"
+    ? import.meta.env.VITE_BACKEND_URL
+    : "http://localhost:8080";
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: "90%",
+  maxHeight: "90vh",
+  overflowY: "auto",
+  bgcolor: "white",
+  padding: "10",
+  borderRadius: "4px",
+};
+
+function ChildModal({ initialState, onSubmit, userId }) {
+  const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
-  const location = useLocation();
-  const [isOpen, setIsOpen] = useState(false);
-  const [userOpen, setUserOpen] = useState(false);
-  const [isFamilyTreeOpen, setIsFamilyTreeOpen] = useState(false);
 
-  const menuRef = useRef(null);
-  const userDropdownRef = useRef(null);
-  const familyTreeDropdownRef = useRef(null);
+  const { loading } = useSelector((state) => state.person);
+  const { Eloading, Eerror, Esuccess } = useSelector(
+    (state) => state.edit.person
+  );
+  const personData = useSelector((state) => state.person.person);
 
-  const { user } = useSelector((state) => state.auth);
-  const userId = user?.id;
+  const handleOpen = useCallback(() => setOpen(true), []);
+  const handleClose = useCallback(() => setOpen(false), []);
+
+  const handleSubmit = useCallback(
+    (formDataToSubmit) => {
+      onSubmit(formDataToSubmit);
+      handleClose();
+    },
+    [onSubmit, handleClose]
+  );
 
   useEffect(() => {
-    if (userId) {
-      dispatch(getProfile(userId));
+    if (Esuccess) {
+      toast.success("Saved!!");
+      dispatch(invalidateCache());
+      dispatch(fetchAllDetails(userId));
+      dispatch(resetEditState());
+      handleClose();
     }
-  }, [userId, dispatch]);
-
-  useEffect(() => {
-    setIsOpen(false);
-  }, [location]);
-
-  const toggleMenu = () => setIsOpen(!isOpen);
-  const closeMenu = () => {
-    setIsOpen(false);
-    setIsFamilyTreeOpen(false);
-  };
-
-  const toggleFamilyTreeMenu = () => setIsFamilyTreeOpen(!isFamilyTreeOpen);
-  const toggleUserFile = () => setUserOpen(!userOpen);
-
-  const handleClickOutside = (event) => {
-    if (
-      menuRef.current &&
-      !menuRef.current.contains(event.target) &&
-      !userDropdownRef.current?.contains(event.target) &&
-      !familyTreeDropdownRef.current?.contains(event.target)
-    ) {
-      closeMenu();
-      setUserOpen(false);
-      setIsFamilyTreeOpen(false);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  const handleLogout = () => {
-    dispatch(logoutUser());
-  };
-
-  const menuVariants = {
-    open: { opacity: 1, x: 0 },
-    closed: { opacity: 0, x: "-100%" },
-  };
+  }, [Esuccess, dispatch, userId]);
 
   return (
-    <nav className="bg-white shadow-md">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <Link to="/" className="flex-shrink-0 flex items-center">
-              <img
-                className="h-8 w-auto"
-                src="https://flowbite.com/docs/images/logo.svg"
-                alt="Logo"
-              />
-            </Link>
-          </div>
-          <div className="hidden md:ml-6 md:flex md:items-center md:space-x-4">
-            <NavLinks
-              isFamilyTreeOpen={isFamilyTreeOpen}
-              toggleFamilyTreeMenu={toggleFamilyTreeMenu}
-              familyTreeDropdownRef={familyTreeDropdownRef}
-            />
-          </div>
-          <div className="flex items-center">
-            <UserMenu user={user} handleLogout={handleLogout} userId={userId} />
-            <div className="md:hidden ml-2">
-              <motion.button
-                onClick={toggleMenu}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500"
-                aria-expanded="false"
-                whileTap={{ scale: 0.95 }}
-              >
-                <span className="sr-only">Open main menu</span>
-                <svg
-                  className={`${isOpen ? "hidden" : "block"} h-6 w-6`}
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-                <svg
-                  className={`${isOpen ? "block" : "hidden"} h-6 w-6`}
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </motion.button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            ref={menuRef}
-            className="md:hidden"
-            initial="closed"
-            animate="open"
-            exit="closed"
-            variants={menuVariants}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+    <React.Fragment>
+      <button
+        onClick={handleOpen}
+        className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+      >
+        Edit
+      </button>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="child-modal-title"
+        aria-describedby="child-modal-description"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Box sx={{ ...style, width: 400 }}>
+          <Button
+            onClick={handleClose}
+            sx={{ position: "absolute", top: "8px", right: "8px" }}
           >
-            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-              <NavLinks
-                mobile
-                isFamilyTreeOpen={isFamilyTreeOpen}
-                toggleFamilyTreeMenu={toggleFamilyTreeMenu}
-                familyTreeDropdownRef={familyTreeDropdownRef}
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </nav>
+            <IoClose size={24} className="text-red-500" />
+          </Button>
+          {loading ? (
+            <Spinner />
+          ) : (
+            <PersonalForm
+              initialState={personData}
+              isEdit={true}
+              onSubmit={handleSubmit}
+            />
+          )}
+        </Box>
+      </Modal>
+    </React.Fragment>
   );
 }
 
-function NavLinks({
-  mobile = false,
-  isFamilyTreeOpen,
-  toggleFamilyTreeMenu,
-  familyTreeDropdownRef,
-}) {
-  const linkClass = `${
-    mobile ? "block" : ""
-  } px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-green-500 hover:bg-gray-50 transition duration-150 ease-in-out`;
+export default ChildModal;
+
+export const NestedModal = React.forwardRef(({ userId }, ref2) => {
+  const CACHE_TIME = 30 * 60 * 1000; // 30 minutes
+  const dispatch = useDispatch();
+  const [open, setOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+
+  const { Dloading, Derror, Dsuccess } = useSelector(
+    (state) => state.delete.person
+  );
+  const {
+    data: allData,
+    lastFetched,
+    loading,
+  } = useSelector((state) => state.form.fetchDetails);
+  const userInfo = useSelector((state) => state.auth.user);
+  const LoggedId = userInfo?.id;
+
+  const personData = allData?.person;
+
+  const shouldFetchData = useCallback(() => {
+    if (!lastFetched) return true;
+    return Date.now() - lastFetched > CACHE_TIME;
+  }, [lastFetched]);
+
+  useEffect(() => {
+    if (open && userId && shouldFetchData()) {
+      dispatch(fetchAllDetails(userId));
+    }
+  }, [dispatch, userId, shouldFetchData, open]);
+
+  useEffect(() => {
+    if (Dsuccess) {
+      toast.success("Deleted!");
+      dispatch(resetDeleteState());
+      dispatch(invalidateCache());
+      dispatch(fetchAllDetails(userId));
+    }
+  }, [Dsuccess, dispatch, userId]);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const toggleDropdown = () => setDropdownOpen(!isDropdownOpen);
+
+  const handleDelete = () => {
+    if (fatherData?._id) {
+      dispatch(deletePerson(fatherData._id));
+      setDeleteOpen(false);
+      setOpen(false);
+    } else {
+      console.error("Invalid person ID");
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+    if (file) {
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile || !fatherData?._id) return;
+
+    const formData = new FormData();
+    formData.append("image", selectedFile);
+    formData.append("personId", personData._id);
+
+    try {
+      await dispatch(editPerson(formData));
+      toast.success("Image uploaded successfully!");
+      setImagePreview(null);
+      setSelectedFile(null);
+      dispatch(invalidateCache());
+      dispatch(fetchAllDetails(userId));
+    } catch (error) {
+      toast.error("Failed to upload image");
+    }
+  };
+
+  React.useImperativeHandle(ref2, () => ({
+    openModal: handleOpen,
+  }));
+
+  const yearOfBirth = personData?.DOB
+    ? personData.DOB.split("-")[0]
+    : "Unknown";
+  const yearOfDeath = personData?.yearDeceased
+    ? personData.yearDeceased.split("-")[0]
+    : "Unknown";
 
   return (
     <>
-      <NavLink to="/" className={linkClass} end>
-        Home
-      </NavLink>
-      <NavLink to="/About" className={linkClass}>
-        About
-      </NavLink>
-      <NavLink to="/partners" className={linkClass}>
-        Our Partners
-      </NavLink>
-      <NavLink to="/name-meanings" className={linkClass}>
-        Name Meanings
-      </NavLink>
-      <div className="relative" ref={familyTreeDropdownRef}>
-        <button
-          onClick={toggleFamilyTreeMenu}
-          className={`${linkClass} flex items-center`}
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="father-modal-title"
+        aria-describedby="father-modal-description"
+      >
+        <Box
+          sx={{
+            ...style,
+            width: 400,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 6,
+            borderRadius: 2,
+          }}
         >
-          Family Tree
-          <FaChevronDown className="ml-1" />
-        </button>
-        {isFamilyTreeOpen && (
-          <div className="absolute z-10 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-            <Link
-              to="/my-family-tree"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              My Family Tree
-            </Link>
-            <Link
-              to="/search-a-tree"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              Search a Tree
-            </Link>
-          </div>
-        )}
-      </div>
-      <NavLink to="/genealogy" className={linkClass}>
-        Genealogy
-      </NavLink>
-      <NavLink to="/historicalPeople" className={linkClass}>
-        Historical People
-      </NavLink>
-      {mobile && <NotificationBar />}
+          {personData ? (
+            <div className="w-full max-w-sm bg-white  rounded-lg    relative">
+              {LoggedId === userId ? (
+                <div className="absolute top-0 right-0">
+                  <button
+                    id="dropdownButton"
+                    onClick={toggleDropdown}
+                    className="inline-block text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-500 focus:ring-4 focus:outline-none focus:ring-gray-200 dark:focus:ring-gray-200 rounded-lg text-sm p-1.5"
+                    type="button"
+                  >
+                    <span className="sr-only">Open dropdown</span>
+                    <svg
+                      className="w-5 h-5 text-black hover:text-white"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 16 3"
+                    >
+                      <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
+                    </svg>
+                  </button>
+                  {/* Dropdown menu */}
+                  {isDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                      <ChildModal
+                        initialState={personData}
+                        onSubmit={() => {
+                          dispatch(invalidateCache());
+                          dispatch(fetchAllDetails(userId));
+                        }}
+                        userId={userId}
+                      />
+                      <Button
+                        onClick={() => setDeleteOpen(true)}
+                        className="w-full text-left text-red-600 hover:bg-gray-100"
+                      >
+                        Delete
+                      </Button>
+                      <Button
+                        onClick={toggleDropdown}
+                        className="w-full text-left hover:bg-gray-100"
+                      >
+                        Close
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="my-5 flex justify-end text-end mx-3">
+                  <GrTreeOption size={24} className="text-green" />
+                </div>
+              )}
+
+              <div className="flex flex-col items-center">
+                {personData.image ? (
+                  <img
+                    src={`${backendURL}/${personData.image}?${Date.now()}`}
+                    alt={personData.firstName}
+                    className="w-40 h-40 rounded-full mb-4"
+                  />
+                ) : (
+                  <FaUserCircle className="w-40 h-40 text-gray-400 mb-4" />
+                )}
+                <h2 className="text-xl font-medium text-gray-800 mb-2">
+                  {personData.firstName} {personData.lastName}
+                </h2>
+                <p className="text-sm text-gray-500 mb-1">
+                  {personData.Lstatus !== "Deceased"
+                    ? `Born: ${yearOfBirth}`
+                    : `${yearOfBirth} - ${yearOfDeath}`}
+                </p>
+
+                <p className="text-sm text-gray-500 mb-4">
+                  {personData.Lstatus}
+                </p>
+                <div className="flex gap-4">
+                  <Button variant="outlined" color="primary">
+                    Search
+                  </Button>
+                  <Button variant="outlined" color="primary">
+                    Profile
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full">
+              <h2 className="text-lg font-bold mb-2">No Info for this Card</h2>
+              <p className="mb-4">Please add information to this card.</p>
+              <Button
+                href={`/layout/fathers-form/${userId}`}
+                variant="contained"
+                color="primary"
+              >
+                Add Info
+              </Button>
+            </div>
+          )}
+        </Box>
+      </Modal>
+
+      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
+        <DialogTitle>Are you sure you want to delete this item?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Confirm delete or cancel</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setDeleteOpen(false)}
+            startIcon={<IoClose />}
+            color="secondary"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDelete}
+            startIcon={<AiTwotoneDelete />}
+            color="error"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
-}
-
-function UserMenu({ user, handleLogout, userId }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const toggleMenu = () => setIsOpen(!isOpen);
-
-  const menuRef = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  if (!user) {
-    return (
-      <div className="flex space-x-2">
-        <Link
-          to="/login"
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-        >
-          Login
-        </Link>
-        <Link
-          to="/register"
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-green-600 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-        >
-          Sign Up
-        </Link>
-      </div>
-    );
-  }
-
-  return (
-    <div className="ml-3 relative" ref={menuRef}>
-      <div>
-        <button
-          onClick={toggleMenu}
-          className="flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-          id="user-menu"
-          aria-expanded="false"
-          aria-haspopup="true"
-        >
-          <span className="sr-only">Open user menu</span>
-          <IoPersonCircleOutline className="h-8 w-8 rounded-full" />
-        </button>
-      </div>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5"
-            role="menu"
-            aria-orientation="vertical"
-            aria-labelledby="user-menu"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Link
-              to={`/profile/${userId}`}
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              role="menuitem"
-              onClick={() => setIsOpen(false)}
-            >
-              Your Profile
-            </Link>
-            <Link
-              to={`/view-tree/${userId}`}
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              role="menuitem"
-              onClick={() => setIsOpen(false)}
-            >
-              View Tree
-            </Link>
-            <Link
-              to="/chatPage"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              role="menuitem"
-              onClick={() => setIsOpen(false)}
-            >
-              Chat
-            </Link>
-            <Link
-              to="/MyConnections"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              role="menuitem"
-              onClick={() => setIsOpen(false)}
-            >
-              Connections
-            </Link>
-            <button
-              onClick={() => {
-                handleLogout();
-                setIsOpen(false);
-              }}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              role="menuitem"
-            >
-              Sign out
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-export default Navbar;
+});

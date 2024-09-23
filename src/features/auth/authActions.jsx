@@ -24,36 +24,6 @@ export const setEmail = (email) => ({
   payload: email,
 });
 
-// export const loginUser = createAsyncThunk(
-//   "auth/login",
-//   async ({ email, password }, { rejectWithValue }) => {
-//     try {
-//       const response = await axios.post(
-//         `${backendURL}/api/login`,
-//         { email, password },
-//         {
-//           headers: { "Content-Type": "application/json" },
-//           withCredentials: true,
-//         }
-//       );
-
-//       // Extract the token from the response
-//       const { token } = response.data;
-
-//       // Store the token in localStorage
-//       localStorage.setItem("userToken", token);
-
-//       // Return the user data
-//       return response.data;
-//     } catch (error) {
-//       return rejectWithValue(
-//         error.response && error.response.data.message
-//           ? error.response.data.message
-//           : error.message
-//       );
-//     }
-//   }
-// );
 export const loginUser = createAsyncThunk(
   "auth/login",
   async ({ email, password }, { rejectWithValue }) => {

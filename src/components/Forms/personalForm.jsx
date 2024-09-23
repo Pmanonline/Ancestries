@@ -227,9 +227,13 @@ const PersonalForm = ({ initialState = {}, isEdit = false }) => {
       >
         <div className="absolute inset-0 bg-white bg-opacity-50 pointer-events-none"></div>
         <div className="relative z-10 flex-grow flex flex-col p-8">
-          <span className="w-full flex justify-center">
-            <LayoutNAv />
-          </span>
+          {isEdit ? (
+            ""
+          ) : (
+            <span className="w-full flex justify-center">
+              <LayoutNAv />
+            </span>
+          )}
           <div className="flex flex-col items-center lg:items-start lg:flex-row">
             <form
               onSubmit={handleSubmit}

@@ -1,4 +1,118 @@
-import React, { useEffect, useState } from "react";
+// import React, { useEffect, useState, useCallback, useMemo } from "react";
+// import axios from "axios";
+// import Box from "@mui/material/Box";
+// import Modal from "@mui/material/Modal";
+// import Button from "@mui/material/Button";
+// import Dialog from "@mui/material/Dialog";
+// import DialogActions from "@mui/material/DialogActions";
+// import DialogContent from "@mui/material/DialogContent";
+// import DialogContentText from "@mui/material/DialogContentText";
+// import DialogTitle from "@mui/material/DialogTitle";
+// import Spinner from "../../components/tools/Spinner";
+// import { resetEditState } from "../../features/UserFeature/EditSlice";
+// import { toast } from "react-toastify";
+// import { resetDeleteState } from "../../features/UserFeature/deleteUserSlice";
+// import { useDispatch, useSelector } from "react-redux";
+// import { RiImageAddFill } from "react-icons/ri";
+// import { IoClose } from "react-icons/io5";
+// import { AiTwotoneDelete } from "react-icons/ai";
+// import { FaUserCircle } from "react-icons/fa";
+// import { GrTreeOption } from "react-icons/gr";
+// import {
+//   fetchAllDetails,
+//   deletePerson,
+//   editPerson,
+// } from "../../features/UserFeature/UserAction";
+// import FatherForm from "../../components/Forms/FathersForm";
+// import { invalidateCache } from "../../features/UserFeature/UserSlice";
+
+// const backendURL =
+//   import.meta.env.MODE === "production"
+//     ? import.meta.env.VITE_BACKEND_URL
+//     : "http://localhost:8080";
+
+// const style = {
+//   position: "absolute",
+//   top: "50%",
+//   left: "50%",
+//   transform: "translate(-50%, -50%)",
+//   width: "90%",
+//   maxHeight: "90vh",
+//   overflowY: "auto",
+//   bgcolor: "white",
+//   padding: "10",
+//   borderRadius: "4px",
+// };
+
+// function ChildModal({ initialState, onSubmit, userId }) {
+//   const [open, setOpen] = useState(false);
+//   const dispatch = useDispatch();
+
+//   const { loading } = useSelector((state) => state.person);
+//   const { Eloading, Eerror, Esuccess } = useSelector(
+//     (state) => state.edit.person
+//   );
+//   const fatherData = useSelector((state) => state.person.father);
+
+//   const handleOpen = useCallback(() => setOpen(true), []);
+//   const handleClose = useCallback(() => setOpen(false), []);
+
+//   const handleSubmit = useCallback(
+//     (formDataToSubmit) => {
+//       onSubmit(formDataToSubmit);
+//       handleClose();
+//     },
+//     [onSubmit, handleClose]
+//   );
+
+//   const handleEditSuccess = useCallback(() => {
+//     toast.success("Saved!!");
+//     dispatch(resetEditState());
+//     dispatch(fetchAllDetails(userId));
+//   }, [dispatch, userId]);
+
+//   useEffect(() => {
+//     if (Esuccess) {
+//       handleEditSuccess();
+//     }
+//   }, [Esuccess, handleEditSuccess]);
+
+//   return (
+//     <React.Fragment>
+//       <button
+//         onClick={handleOpen}
+//         className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+//       >
+//         Edit
+//       </button>
+//       <Modal
+//         open={open}
+//         onClose={handleClose}
+//         aria-labelledby="child-modal-title"
+//         aria-describedby="child-modal-description"
+//       >
+//         <Box sx={{ ...style, width: 400 }}>
+//           <Button onClick={handleClose}>
+//             <IoClose size={24} className="text-red-500" />
+//           </Button>
+//           {loading ? (
+//             <Spinner />
+//           ) : (
+//             <FatherForm
+//               initialState={fatherData}
+//               isEdit={true}
+//               onSubmit={handleSubmit}
+//             />
+//           )}
+//         </Box>
+//       </Modal>
+//     </React.Fragment>
+//   );
+// }
+
+// export default ChildModal;
+
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import axios from "axios";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
@@ -10,7 +124,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Spinner from "../../components/tools/Spinner";
 import { resetEditState } from "../../features/UserFeature/EditSlice";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import { resetDeleteState } from "../../features/UserFeature/deleteUserSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { RiImageAddFill } from "react-icons/ri";
@@ -21,8 +135,10 @@ import { GrTreeOption } from "react-icons/gr";
 import {
   fetchAllDetails,
   deletePerson,
+  editPerson,
 } from "../../features/UserFeature/UserAction";
 import FatherForm from "../../components/Forms/FathersForm";
+import { invalidateCache } from "../../features/UserFeature/UserSlice";
 
 const backendURL =
   import.meta.env.MODE === "production"
@@ -41,52 +157,62 @@ const style = {
   padding: "10",
   borderRadius: "4px",
 };
+
 function ChildModal({ initialState, onSubmit, userId }) {
-  const [open, setOpen] = React.useState(false);
-  const handleOpen = () => {
-    setOpen(true);
-  };
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
-  const { loading, error, success } = useSelector((state) => state.person);
+
+  const { loading } = useSelector((state) => state.person);
   const { Eloading, Eerror, Esuccess } = useSelector(
     (state) => state.edit.person
   );
-
   const fatherData = useSelector((state) => state.person.father);
-  console.log(fatherData);
 
-  const handleSubmit = (formDataToSubmit) => {
-    onSubmit(formDataToSubmit);
-    handleClose();
-  };
+  const handleOpen = useCallback(() => setOpen(true), []);
+  const handleClose = useCallback(() => setOpen(false), []);
+
+  const handleSubmit = useCallback(
+    (formDataToSubmit) => {
+      onSubmit(formDataToSubmit);
+      handleClose();
+    },
+    [onSubmit, handleClose]
+  );
 
   useEffect(() => {
     if (Esuccess) {
       toast.success("Saved!!");
-      dispatch(resetEditState());
+      dispatch(invalidateCache());
       dispatch(fetchAllDetails(userId));
+      dispatch(resetEditState());
+      handleClose();
     }
   }, [Esuccess, dispatch, userId]);
 
   return (
     <React.Fragment>
-      <button
+      <Button
         onClick={handleOpen}
-        className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white "
+        className="w-full text-left hover:bg-gray-100"
       >
         Edit
-      </button>
+      </Button>
       <Modal
         open={open}
         onClose={handleClose}
         aria-labelledby="child-modal-title"
         aria-describedby="child-modal-description"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
       >
         <Box sx={{ ...style, width: 400 }}>
-          <Button onClick={handleClose}>
+          <Button
+            onClick={handleClose}
+            sx={{ position: "", top: "8px", right: "8px" }}
+          >
             <IoClose size={24} className="text-red-500" />
           </Button>
           {loading ? (
@@ -107,68 +233,92 @@ function ChildModal({ initialState, onSubmit, userId }) {
 export default ChildModal;
 
 export const FatherModal = React.forwardRef(({ userId }, ref2) => {
-  const [open, setOpen] = React.useState(false);
+  const CACHE_TIME = 30 * 60 * 1000; // 30 minutes
   const dispatch = useDispatch();
-  const fatherData = useSelector((state) => state.person.father);
-  const userInfo = useSelector((state) => state.auth.user);
-  const LoggedId = userInfo?.id;
+  const [open, setOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
+
   const { Dloading, Derror, Dsuccess } = useSelector(
     (state) => state.delete.person
   );
+  const {
+    data: allData,
+    lastFetched,
+    loading,
+  } = useSelector((state) => state.form.fetchDetails);
+  const userInfo = useSelector((state) => state.auth.user);
+  const LoggedId = userInfo?.id;
 
-  console.log(fatherData);
-  const [Deleteopen, setDeleteOpen] = React.useState(false);
+  const fatherData = allData?.father;
+
+  const shouldFetchData = useCallback(() => {
+    if (!lastFetched) return true;
+    return Date.now() - lastFetched > CACHE_TIME;
+  }, [lastFetched]);
 
   useEffect(() => {
-    if (userId) {
+    if (open && userId && shouldFetchData()) {
       dispatch(fetchAllDetails(userId));
     }
-  }, [dispatch, userId]);
-
-  useEffect(() => {
-    console.log("Father Data:", fatherData);
-  }, [fatherData]);
-  const handleOpen = () => {
-    setOpen(true);
-  };
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const DeleteOpen = () => {
-    setDeleteOpen(true);
-  };
-  const DeleteClose = () => {
-    setDeleteOpen(false);
-  };
+  }, [dispatch, userId, shouldFetchData, open]);
 
   useEffect(() => {
     if (Dsuccess) {
-      toast.success("Deleted!!");
+      toast.success("Deleted!");
       dispatch(resetDeleteState());
+      dispatch(invalidateCache());
       dispatch(fetchAllDetails(userId));
     }
   }, [Dsuccess, dispatch, userId]);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file);
-
-    if (file) {
-      const fileURL = URL.createObjectURL(file);
-      setImagePreview(fileURL);
-    }
-  };
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const toggleDropdown = () => setDropdownOpen(!isDropdownOpen);
 
   const handleDelete = () => {
-    if (fatherData._id) {
+    if (fatherData?._id) {
       dispatch(deletePerson(fatherData._id));
+      setDeleteOpen(false);
       setOpen(false);
     } else {
       console.error("Invalid person ID");
     }
   };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedFile(file);
+    if (file) {
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile || !fatherData?._id) return;
+
+    const formData = new FormData();
+    formData.append("image", selectedFile);
+    formData.append("personId", fatherData._id);
+
+    try {
+      await dispatch(editPerson(formData));
+      toast.success("Image uploaded successfully!");
+      setImagePreview(null);
+      setSelectedFile(null);
+      dispatch(invalidateCache());
+      dispatch(fetchAllDetails(userId));
+    } catch (error) {
+      toast.error("Failed to upload image");
+    }
+  };
+
+  React.useImperativeHandle(ref2, () => ({
+    openModal: handleOpen,
+  }));
+
   const yearOfBirth = fatherData?.DOB
     ? fatherData.DOB.split("-")[0]
     : "Unknown";
@@ -176,44 +326,28 @@ export const FatherModal = React.forwardRef(({ userId }, ref2) => {
     ? fatherData.yearDeceased.split("-")[0]
     : "Unknown";
 
-  React.useImperativeHandle(ref2, () => ({
-    openModal: handleOpen,
-  }));
-  const handleUpload = async () => {
-    if (!selectedFile || !fatherData._id) return;
-
-    const formData = new FormData();
-    formData.append("image", selectedFile);
-    formData.append("personId", fatherData._id);
-
-    try {
-      dispatch(editPerson(formData));
-      toast.success("Image uploaded successfully!");
-      setImagePreview(null);
-      setSelectedFile(null);
-      dispatch(fetchAllDetails());
-    } catch (error) {
-      toast.error("Failed to upload image");
-    }
-  };
-  const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const toggleDropdown = () => {
-    setDropdownOpen(!isDropdownOpen);
-  };
-
   return (
-    <div className="hidden">
+    <>
       <Modal
         open={open}
         onClose={handleClose}
-        aria-labelledby="parent-modal-title"
-        aria-describedby="parent-modal-description"
+        aria-labelledby="father-modal-title"
+        aria-describedby="father-modal-description"
       >
-        <Box sx={{ ...style, width: 400 }}>
-          {fatherData && Object.keys(fatherData).length > 0 ? (
-            <div className="w-full max-w-sm bg-white  rounded-lg shadow   relative">
+        <Box
+          sx={{
+            ...style,
+            width: 400,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+          }}
+        >
+          {fatherData ? (
+            <div className="w-full max-w-sm bg-white  rounded-lg    relative">
               {LoggedId === userId ? (
-                <div className="flex justify-end px-4 pt-4">
+                <div className="absolute top-0 right-0">
                   <button
                     id="dropdownButton"
                     onClick={toggleDropdown}
@@ -233,71 +367,27 @@ export const FatherModal = React.forwardRef(({ userId }, ref2) => {
                   </button>
                   {/* Dropdown menu */}
                   {isDropdownOpen && (
-                    <div
-                      id="dropdown"
-                      className="absolute top-12 right-0 z-10 text-base list-none divide-y divide-gray-100 rounded-lg shadow w-44 bg-gray-500"
-                    >
-                      <ul className="py-2">
-                        <li>
-                          <ChildModal
-                            initialState={fatherData}
-                            onSubmit={(data) => {
-                              dispatch(fetchAllDetails(userId));
-                            }}
-                            userId={userId}
-                          />
-                        </li>
-
-                        {/* DELETING MODAL STARTS HERE */}
-                        <Button>
-                          <React.Fragment>
-                            <a
-                              onClick={DeleteOpen}
-                              href="#"
-                              className="block px-2 lowercase py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                            >
-                              Delete
-                            </a>
-                            {/* </Button> */}
-                            <Dialog
-                              open={Deleteopen}
-                              onClose={DeleteClose}
-                              aria-labelledby="alert-dialog-title"
-                              aria-describedby="alert-dialog-description"
-                            >
-                              <DialogTitle id="alert-dialog-title">
-                                Are you sure you want to delete this item?
-                              </DialogTitle>
-                              <DialogContent>
-                                <DialogContentText id="alert-dialog-description">
-                                  Confirm delete or cancel
-                                </DialogContentText>
-                              </DialogContent>
-                              <DialogActions>
-                                <Button onClick={DeleteClose}>
-                                  <IoClose size={24} className="text-red-500" />
-                                </Button>
-                                <Button onClick={handleDelete}>
-                                  <AiTwotoneDelete
-                                    size={24}
-                                    className="text-red-300"
-                                  />
-                                </Button>
-                              </DialogActions>
-                            </Dialog>
-                          </React.Fragment>
-                        </Button>
-                        {/* // DELETING MODAL ENDS HERE */}
-                        <li>
-                          <a
-                            onClick={toggleDropdown}
-                            href="#"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                          >
-                            Close
-                          </a>
-                        </li>
-                      </ul>
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                      <ChildModal
+                        initialState={fatherData}
+                        onSubmit={() => {
+                          dispatch(invalidateCache());
+                          dispatch(fetchAllDetails(userId));
+                        }}
+                        userId={userId}
+                      />
+                      <Button
+                        onClick={() => setDeleteOpen(true)}
+                        className="w-full text-left text-red-600 hover:bg-gray-100"
+                      >
+                        Delete
+                      </Button>
+                      <Button
+                        onClick={toggleDropdown}
+                        className="w-full text-left hover:bg-gray-100"
+                      >
+                        Close
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -307,85 +397,80 @@ export const FatherModal = React.forwardRef(({ userId }, ref2) => {
                 </div>
               )}
 
-              <div className="flex flex-col items-center pb-10">
+              <div className="flex flex-col items-center">
                 {fatherData.image ? (
                   <img
-                    src={`${backendURL}/${
-                      fatherData.image
-                    }?${new Date().getTime()}`}
+                    src={`${backendURL}/${fatherData.image}?${Date.now()}`}
                     alt={fatherData.firstName}
-                    className="w-[10rem] h-[10rem] rounded-full"
+                    className="w-40 h-40 rounded-full mb-4"
                   />
                 ) : (
-                  <FaUserCircle className="w-[10rem] h-[10rem] text-gray-400" />
+                  <FaUserCircle className="w-40 h-40 text-gray-400 mb-4" />
                 )}
-                <h5 className="mb-1 text-xl font-medium text-gray-500 ">
+                <h2 className="text-xl font-medium text-gray-800 mb-2">
                   {fatherData.firstName} {fatherData.lastName}
-                </h5>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  {fatherData.Lstatus !== "Deceased" ? (
-                    <>
-                      Born on:
-                      <span className="mx-2 font-medium">{yearOfBirth}</span>
-                    </>
-                  ) : null}
-                </span>
-                <span className="text-sm text-gray-500 dark:text-gray-400">
-                  {fatherData.placesLived ? (
-                    <>
-                      Place lived:
-                      <span className="mx-2 font-medium">
-                        {fatherData.placesLived}
-                      </span>
-                    </>
-                  ) : null}
-                </span>
-
-                <span className="text-sm text-gray-500 dark:text-gray-400">
+                </h2>
+                <p className="text-sm text-gray-500 mb-1">
+                  {fatherData.Lstatus !== "Deceased"
+                    ? `Born: ${yearOfBirth}`
+                    : `${yearOfBirth} - ${yearOfDeath}`}
+                </p>
+                {fatherData.placesLived && (
+                  <p className="text-sm text-gray-500 mb-1">
+                    Place lived: {fatherData.placesLived}
+                  </p>
+                )}
+                <p className="text-sm text-gray-500 mb-4">
                   {fatherData.Lstatus}
-                </span>
-                <span className="text-sm mt-1 text-gray-500 dark:text-gray-400">
-                  {fatherData.Lstatus === "Deceased" ? (
-                    <>
-                      {yearOfBirth} to {yearOfDeath}
-                    </>
-                  ) : null}
-                </span>
-
-                <div className="flex mt-4 md:mt-6 gap-5">
-                  <a
-                    href="#"
-                    className="inline-flex items-center px-4 py-1 text-sm font-medium text-center bg-white text-green border border-green focus:ring-2 rounded-xl focus:outline-none focus:ring-green "
-                  >
+                </p>
+                <div className="flex gap-4">
+                  <Button variant="outlined" color="primary">
                     Search
-                  </a>
-                  <a
-                    href="#"
-                    className="inline-flex items-center px-4 py-1 text-sm font-medium text-center bg-white text-green border border-green focus:ring-2 rounded-xl focus:outline-none focus:ring-green "
-                  >
+                  </Button>
+                  <Button variant="outlined" color="primary">
                     Profile
-                  </a>
+                  </Button>
                 </div>
               </div>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full">
-              <div className="bg-white p-4 rounded-lg shadow-md text-center">
-                <h2 className="text-lg font-bold mb-2">
-                  No Info for this Card
-                </h2>
-                <p className="mb-4">Please add information to this card.</p>
-                <Button
-                  href={`/layout/fathers-form/${userId}`}
-                  className="!bg-green !text-white"
-                >
-                  Add Info
-                </Button>
-              </div>
+              <h2 className="text-lg font-bold mb-2">No Info for this Card</h2>
+              <p className="mb-4">Please add information to this card.</p>
+              <Button
+                href={`/layout/fathers-form/${userId}`}
+                variant="contained"
+                color="primary"
+              >
+                Add Info
+              </Button>
             </div>
           )}
         </Box>
       </Modal>
-    </div>
+
+      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
+        <DialogTitle>Are you sure you want to delete this item?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Confirm delete or cancel</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setDeleteOpen(false)}
+            startIcon={<IoClose />}
+            color="secondary"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDelete}
+            startIcon={<AiTwotoneDelete />}
+            color="error"
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 });
