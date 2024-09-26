@@ -165,7 +165,13 @@ const PaternalGrandfatherForm = ({ initialState = {}, isEdit = false }) => {
       >
         <div className="absolute inset-0 bg-opacity-50 pointer-events-none"></div>
         <span className="w-full flex justify-center">
-          <LayoutNAv />
+          {isEdit ? (
+            ""
+          ) : (
+            <span className="w-full flex justify-center">
+              <LayoutNAv />
+            </span>
+          )}
         </span>
         <div className="relative p-8 flex flex-col items-center lg:items-start lg:flex-row">
           <form
@@ -317,6 +323,7 @@ const PaternalGrandfatherForm = ({ initialState = {}, isEdit = false }) => {
               <button
                 type="submit"
                 className="border border-green w-full lg:w-[70%] flex items-center bg-green-500 bg-white px-4 py-2 transition ease-in-out duration-200 transform hover:scale-105 rounded-3xl"
+                disabled={loading || Eloading} // Disable button when loading
               >
                 {loading || Eloading ? (
                   <Spinner />
@@ -325,12 +332,10 @@ const PaternalGrandfatherForm = ({ initialState = {}, isEdit = false }) => {
                     {isEdit ? (
                       "Update"
                     ) : (
-                      <>
-                        <span className="flex items-center justify-center space-x-2">
-                          <span>Click here to continue </span>
-                          <DirectionButton1 />
-                        </span>
-                      </>
+                      <span className="flex items-center justify-center space-x-2">
+                        <span>Click here to continue </span>
+                        <DirectionButton1 />
+                      </span>
                     )}
                   </span>
                 )}

@@ -108,6 +108,7 @@
 
 // export const { resetSuccess, resetError } = formSlice.actions;
 // export default formSlice.reducer;
+
 import { createSlice } from "@reduxjs/toolkit";
 import { createFamilyMember, fetchAllDetails } from "./UserAction";
 
@@ -169,6 +170,7 @@ const formSlice = createSlice({
       .addCase(fetchAllDetails.rejected, (state, action) => {
         state.fetchDetails.loading = false;
         state.fetchDetails.error = action.payload;
+        state.fetchDetails.data = null;
       });
   },
 });

@@ -11,7 +11,8 @@ import { PGFModal } from "../components/modals/PgrandfatherModal";
 import { PGMModal } from "../components/modals/PgrandMotherModal";
 import { MGFModal } from "../components/modals/MgrandFatherModal";
 import { MGMModal } from "../components/modals/MgrandMotherModal";
-import { PGGFModal } from "../components/modals/paternalGGFModal";
+import { TESTING } from "../components/modals/TestingModal";
+// import PGGFModal from "../components/modals/paternalGGFModal";
 import { PGGMModal } from "../components/modals/paternalGGMModal";
 import { MGGFModal } from "./modals/maternalGGFModal";
 import { MGGFMModal } from "./modals/maternalGGMModal";
@@ -73,20 +74,56 @@ export const FamilyTreeStructure = () => {
   const startPos = useRef({ x: 0, y: 0 });
 
   console.error(invites, "USERS INVITES");
+  // const personState = useSelector((state) => state.form);
+  // console.log("Complete Person State:", personState);
+
+  // const {
+  //   person: personData,
+  //   father: fatherData,
+  //   mother: motherData,
+  //   MGF: MGFData,
+  //   MGM: MGMData,
+  //   PGF: PGFData,
+  //   PGM: PGMData,
+  //   PGGF: PGGFData,
+  //   PGGM: PGGMData,
+  //   MGGF: MGGFData,
+  //   MGGM: MGGMData,
+  // } = useSelector((state) => state.person);
+
+  // console.log("Person Data:", personData);
+  // console.log("Father Data:", fatherData);
+  // console.log("Mother Data:", motherData);
+  // console.log("MGF Data:", MGFData);
+  // console.log("MGM Data:", MGMData);
+  // console.log("PGF Data:", PGFData);
+  // console.log("PGM Data:", PGMData);
+  // console.log("PGGF Data:", PGGFData);
+  // console.log("PGGM Data:", PGGMData);
+  // console.log("MGGF Data:", MGGFData);
+  // console.log("MGGM Data:", MGGMData);
+
+  // Access the entire state
+  const personState = useSelector((state) => state.form);
+  console.log("Complete Person State:", personState);
 
   const {
-    person: personData,
-    father: fatherData,
-    mother: motherData,
-    MGF: MGFData,
-    MGM: MGMData,
-    PGF: PGFData,
-    PGM: PGMData,
-    PGGF: PGGFData,
-    PGGM: PGGMData,
-    MGGF: MGGFData,
-    MGGM: MGGMData,
-  } = useSelector((state) => state.person);
+    fetchDetails: {
+      data: {
+        person: personData = null,
+        father: fatherData = null,
+        mother: motherData = null,
+        mGFather: MGFData = null,
+        mGMother: MGMData = null,
+        pGFather: PGFData = null,
+        pGMother: PGMData = null,
+        pGrtGrandFather: PGGFData = null,
+        pGrtGrandMother: PGGMData = null,
+        mGrtGrandFather: MGGFData = null,
+        mGrtGrandMother: MGGMData = null,
+      } = {},
+    } = {},
+  } = useSelector((state) => state.form) || {};
 
   const personCard =
     personData && Object.keys(personData).length > 0
@@ -188,6 +225,7 @@ export const FamilyTreeStructure = () => {
     PGGM: useRef(),
     MGGF: useRef(),
     MGGM: useRef(),
+    TEST: useRef(),
   };
 
   const openModal = (modalType) => {
@@ -400,16 +438,19 @@ export const FamilyTreeStructure = () => {
                       ? "bg-[#A9A8A8]"
                       : "bg-[#E8F3E7]"
                   } border border-gray-300 p-6 rounded-lg shadow-md text-center max-w-[7rem]`}
+                  // onClick={() => openModal("PGGF")}
                   onClick={() => openModal("PGGF")}
                 >
                   <p className="flex justify-center mb-5">
                     <TreeProfile />
                   </p>
                   <p className="text-xs text-center flex justify-center">
-                    Grt_Grandfather <br /> (Paternal)
+                    Grt_Grandfather.......... <br /> (Paternal).........
                   </p>
                 </div>
-                <PGGFModal ref={modalRefs.PGGF} userId={userId} />
+                {/* <PGGFModalTesting ref={modalRefs.PGGF} userId={userId} /> */}
+                <TESTING ref={modalRefs.PGGF} userId={userId} />
+
                 <div className="line-horizontal w-16 h-0.5 bg-gray-300 absolute bottom-[4.5rem] left-full"></div>
               </div>
               {/* PGGM */}

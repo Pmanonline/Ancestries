@@ -163,9 +163,13 @@ const PaternalGGFform = ({ initialState = {}, isEdit = false }) => {
         style={{ backgroundImage: `url(${backgroundImage})` }}
       >
         <div className="absolute inset-0 bg-opacity-50 pointer-events-none"></div>
-        <span className="w-full flex justify-center">
-          <LayoutNAv />
-        </span>
+        {isEdit ? (
+          ""
+        ) : (
+          <span className="w-full flex justify-center">
+            <LayoutNAv />
+          </span>
+        )}
         <div className="relative p-8 flex flex-col items-center lg:items-start lg:flex-row">
           <form
             onSubmit={handleSubmit}

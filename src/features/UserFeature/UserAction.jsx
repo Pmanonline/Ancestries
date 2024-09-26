@@ -223,6 +223,7 @@ export const fetchAllDetails = createAsyncThunk(
         }
         return acc;
       }, {});
+      console.log(result);
 
       return { ...result, lastFetched: Date.now() };
     } catch (error) {
