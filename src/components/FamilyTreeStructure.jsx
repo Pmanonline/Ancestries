@@ -74,56 +74,56 @@ export const FamilyTreeStructure = () => {
   const startPos = useRef({ x: 0, y: 0 });
 
   console.error(invites, "USERS INVITES");
-  // const personState = useSelector((state) => state.form);
-  // console.log("Complete Person State:", personState);
-
-  // const {
-  //   person: personData,
-  //   father: fatherData,
-  //   mother: motherData,
-  //   MGF: MGFData,
-  //   MGM: MGMData,
-  //   PGF: PGFData,
-  //   PGM: PGMData,
-  //   PGGF: PGGFData,
-  //   PGGM: PGGMData,
-  //   MGGF: MGGFData,
-  //   MGGM: MGGMData,
-  // } = useSelector((state) => state.person);
-
-  // console.log("Person Data:", personData);
-  // console.log("Father Data:", fatherData);
-  // console.log("Mother Data:", motherData);
-  // console.log("MGF Data:", MGFData);
-  // console.log("MGM Data:", MGMData);
-  // console.log("PGF Data:", PGFData);
-  // console.log("PGM Data:", PGMData);
-  // console.log("PGGF Data:", PGGFData);
-  // console.log("PGGM Data:", PGGMData);
-  // console.log("MGGF Data:", MGGFData);
-  // console.log("MGGM Data:", MGGMData);
-
-  // Access the entire state
   const personState = useSelector((state) => state.form);
   console.log("Complete Person State:", personState);
 
   const {
-    fetchDetails: {
-      data: {
-        person: personData = null,
-        father: fatherData = null,
-        mother: motherData = null,
-        mGFather: MGFData = null,
-        mGMother: MGMData = null,
-        pGFather: PGFData = null,
-        pGMother: PGMData = null,
-        pGrtGrandFather: PGGFData = null,
-        pGrtGrandMother: PGGMData = null,
-        mGrtGrandFather: MGGFData = null,
-        mGrtGrandMother: MGGMData = null,
-      } = {},
-    } = {},
-  } = useSelector((state) => state.form) || {};
+    person: personData,
+    father: fatherData,
+    mother: motherData,
+    MGF: MGFData,
+    MGM: MGMData,
+    PGF: PGFData,
+    PGM: PGMData,
+    PGGF: PGGFData,
+    PGGM: PGGMData,
+    MGGF: MGGFData,
+    MGGM: MGGMData,
+  } = useSelector((state) => state.person);
+
+  console.log("Person Data:", personData);
+  console.log("Father Data:", fatherData);
+  console.log("Mother Data:", motherData);
+  console.log("MGF Data:", MGFData);
+  console.log("MGM Data:", MGMData);
+  console.log("PGF Data:", PGFData);
+  console.log("PGM Data:", PGMData);
+  console.log("PGGF Data:", PGGFData);
+  console.log("PGGM Data:", PGGMData);
+  console.log("MGGF Data:", MGGFData);
+  console.log("MGGM Data:", MGGMData);
+
+  // Access the entire state
+  // const personState = useSelector((state) => state.form);
+  // console.log("Complete Person State:", personState);
+
+  // const {
+  //   fetchDetails: {
+  //     data: {
+  //       person: personData = null,
+  //       father: fatherData = null,
+  //       mother: motherData = null,
+  //       mGFather: MGFData = null,
+  //       mGMother: MGMData = null,
+  //       pGFather: PGFData = null,
+  //       pGMother: PGMData = null,
+  //       pGrtGrandFather: PGGFData = null,
+  //       pGrtGrandMother: PGGMData = null,
+  //       mGrtGrandFather: MGGFData = null,
+  //       mGrtGrandMother: MGGMData = null,
+  //     } = {},
+  //   } = {},
+  // } = useSelector((state) => state.form) || {};
 
   const personCard =
     personData && Object.keys(personData).length > 0
