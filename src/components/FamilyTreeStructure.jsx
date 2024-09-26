@@ -445,7 +445,7 @@ export const FamilyTreeStructure = () => {
                     <TreeProfile />
                   </p>
                   <p className="text-xs text-center flex justify-center">
-                    Grt_Grandfather.......... <br /> (Paternal).........
+                    Grt_Grandfather <br /> (Paternal)
                   </p>
                 </div>
                 {/* <PGGFModalTesting ref={modalRefs.PGGF} userId={userId} /> */}
