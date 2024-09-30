@@ -527,7 +527,7 @@ export function SearchTree() {
                       <div className="px-4 py-2 flex-grow">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <p className="text-blue-200 text-sm">Gender</p>
+                            <p className="text-blue-200 text-sm">Gender </p>
                             <p>{result.gender}</p>
                           </div>
                           <div>

@@ -1,358 +1,502 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import axios from "axios";
-import Box from "@mui/material/Box";
-import Modal from "@mui/material/Modal";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
-import Spinner from "../../components/tools/Spinner";
-import { resetEditState } from "../../features/UserFeature/EditSlice";
-import { toast } from "react-toastify";
-import { resetDeleteState } from "../../features/UserFeature/deleteUserSlice";
+import React, { useState, useEffect, useContext, useRef } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { RiImageAddFill } from "react-icons/ri";
-import { IoClose } from "react-icons/io5";
-import { AiTwotoneDelete } from "react-icons/ai";
-import { FaUserCircle } from "react-icons/fa";
-import { GrTreeOption } from "react-icons/gr";
+import moment from "moment";
+import { DirectionButton2 } from "../../components/d-button";
+
+// MUI imports
 import {
-  fetchAllDetails,
-  deletePerson,
-  editPerson,
+  Box,
+  Typography,
+  Avatar,
+  Button,
+  Card,
+  CardContent,
+  List,
+  ListItem,
+  ListItemText,
+  CircularProgress,
+  Divider,
+  Grid,
+  Paper,
+  IconButton,
+  styled,
+  useMediaQuery,
+  Container,
+} from "@mui/material";
+import {
+  Message as MessageIcon,
+  Home as HomeIcon,
+  Group as GroupIcon,
+  Book as BookIcon,
+  PersonAdd as PersonAddIcon,
+  Twitter as TwitterIcon,
+  WhatsApp as WhatsAppIcon,
+  Facebook as FacebookIcon,
+  Instagram as InstagramIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
+} from "@mui/icons-material";
+import FamilyTreeIcon from "@mui/icons-material/AccountTree"; // For "View Family Tree"
+import ChatIcon from "@mui/icons-material/Chat"; // For "Start Chat"
+import LocationOnIcon from "@mui/icons-material/LocationOn"; // For "State & Culture"
+import DetailsIcon from "@mui/icons-material/Details"; // For "Family Details"
+import InfoIcon from "@mui/icons-material/Info"; // For "About"
+
+// Custom imports (assumed to exist)
+import { AuthContext } from "../../components/context/AuthContext";
+import { ChatContext } from "../../components/context/chatContext";
+import {
+  getProfile,
+  getAllProfiles,
 } from "../../features/UserFeature/UserAction";
-import PersonalForm from "../../components/Forms/personalForm";
-import { invalidateCache } from "../../features/UserFeature/UserSlice";
+import { calculateBirthdayCountdown } from "../../components/tools/birthdayCountdown";
+import noProfile from "../../assets/images/noProfile.png";
+import BirthdayFrame from "../../assets/images/birthdayFrame.png";
 
 const backendURL =
   import.meta.env.MODE === "production"
     ? import.meta.env.VITE_BACKEND_URL
     : "http://localhost:8080";
 
-const style = {
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  margin: theme.spacing(2, 0),
+}));
+
+const BirthdayCard = styled(Card)(({ theme }) => ({
+  backgroundImage: `url(${BirthdayFrame})`,
+  backgroundSize: "cover",
+  height: "15rem",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: theme.spacing(2),
+  "& .MuiTypography-root": {
+    color: theme.palette.common.black,
+    textAlign: "center",
+  },
+}));
+
+const CarouselContainer = styled(Box)(({ theme }) => ({
+  position: "relative",
+  overflow: "hidden",
+  width: "100%",
+  height: "300px", // Adjust as needed
+}));
+
+const CarouselTrack = styled(Box)(({ theme }) => ({
+  display: "flex",
+  transition: "transform 0.5s ease",
+}));
+
+const CarouselCard = styled(Card)(({ theme }) => ({
+  flex: "0 0 auto",
+  width: "250px", // Adjust card width as needed
+  marginRight: theme.spacing(2),
+}));
+
+const CarouselButton = styled(IconButton)(({ theme }) => ({
   position: "absolute",
   top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: "90%",
-  maxHeight: "90vh",
-  overflowY: "auto",
-  bgcolor: "white",
-  padding: "10",
-  borderRadius: "4px",
-};
+  transform: "translateY(-50%)",
+  zIndex: 1,
+}));
 
-function ChildModal({ initialState, onSubmit, userId }) {
-  const [open, setOpen] = useState(false);
+function FamilyTreeFeeds() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { userId } = useParams();
+  const { user } = useContext(AuthContext);
+  const { CreateChat, updateCurrentChat } = useContext(ChatContext);
 
-  const { loading } = useSelector((state) => state.person);
-  const { Eloading, Eerror, Esuccess } = useSelector(
-    (state) => state.edit.person
-  );
-  const personData = useSelector((state) => state.person.person);
-
-  const handleOpen = useCallback(() => setOpen(true), []);
-  const handleClose = useCallback(() => setOpen(false), []);
-
-  const handleSubmit = useCallback(
-    (formDataToSubmit) => {
-      onSubmit(formDataToSubmit);
-      handleClose();
-    },
-    [onSubmit, handleClose]
-  );
+  const { profile, profiles, loading } = useSelector((state) => state.person);
 
   useEffect(() => {
-    if (Esuccess) {
-      toast.success("Saved!!");
-      dispatch(invalidateCache());
-      dispatch(fetchAllDetails(userId));
-      dispatch(resetEditState());
-      handleClose();
+    if (userId) {
+      dispatch(getProfile(userId));
+      dispatch(getAllProfiles());
     }
-  }, [Esuccess, dispatch, userId]);
+  }, [dispatch, userId]);
+
+  const formattedDate = profile?.DOB
+    ? moment(profile.DOB).format("DD MMMM YYYY")
+    : "N/A";
+  const daysUntilBirthday = calculateBirthdayCountdown(formattedDate);
+  const imageSrc = profile?.image
+    ? `${backendURL}/${profile.image}`
+    : noProfile;
+
+  const handleStartChat = async () => {
+    try {
+      const chat = await CreateChat(userId, user.id);
+      if (chat) {
+        updateCurrentChat(chat, user, []);
+        navigate("/chatPage");
+      }
+    } catch (error) {
+      console.error("Error creating chat:", error);
+    }
+  };
+  const isMobile = useMediaQuery("(max-width:600px)");
+
+  const relatedProfiles = profiles.filter(
+    (p) =>
+      (p.firstName === profile?.firstName ||
+        p.lastName === profile?.lastName) &&
+      p._id !== userId
+  );
+  const carouselRef = useRef(null);
+  const [carouselPosition, setCarouselPosition] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (carouselRef.current) {
+        const maxScroll =
+          carouselRef.current.scrollWidth - carouselRef.current.clientWidth;
+        setCarouselPosition((prevPosition) => {
+          const newPosition = prevPosition + 1;
+          return newPosition > maxScroll ? 0 : newPosition;
+        });
+      }
+    }, 50); // Adjust speed as needed
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollTo({
+        left: carouselPosition,
+        behavior: "smooth",
+      });
+    }
+  }, [carouselPosition]);
+
+  const handleCarouselScroll = (direction) => {
+    const scrollAmount = 250; // Adjust based on card width
+    setCarouselPosition((prevPosition) => {
+      const newPosition =
+        prevPosition + (direction === "left" ? -scrollAmount : scrollAmount);
+      const maxScroll =
+        carouselRef.current.scrollWidth - carouselRef.current.clientWidth;
+      return Math.max(0, Math.min(newPosition, maxScroll));
+    });
+  };
+  const getText = (html) => {
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    return doc.body.textContent;
+  };
+  if (loading) return <CircularProgress />;
 
   return (
-    <React.Fragment>
-      <button
-        onClick={handleOpen}
-        className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-      >
-        Edit
-      </button>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="child-modal-title"
-        aria-describedby="child-modal-description"
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Box sx={{ ...style, width: 400 }}>
-          <Button
-            onClick={handleClose}
-            sx={{ position: "absolute", top: "8px", right: "8px" }}
-          >
-            <IoClose size={24} className="text-red-500" />
-          </Button>
-          {loading ? (
-            <Spinner />
-          ) : (
-            <PersonalForm
-              initialState={personData}
-              isEdit={true}
-              onSubmit={handleSubmit}
-            />
-          )}
+    <Box sx={{ display: "flex", p: 3 }}>
+      {/* Sidebar */}
+      <section className="Nlg:hidden ">
+        <Box
+          component="nav"
+          sx={{
+            width: 240,
+            flexShrink: 0,
+            bgcolor: "background.paper",
+            padding: 2,
+            borderRadius: 2,
+            boxShadow: 3,
+            marginTop: 9,
+          }}
+        >
+          <List>
+            {/* View Family Tree */}
+            <ListItem button component={Link} to={`/view-tree/${userId}`}>
+              <FamilyTreeIcon sx={{ marginRight: 1 }} /> {/* Add icon */}
+              <ListItemText primary="View Family Tree" />
+            </ListItem>
+
+            {/* Start Chat */}
+            <ListItem button onClick={handleStartChat}>
+              <ChatIcon sx={{ marginRight: 1 }} /> {/* Add icon */}
+              <ListItemText primary="Start Chat" />
+            </ListItem>
+
+            {/* State & Culture */}
+            <ListItem
+              button
+              component={Link}
+              to={`/genealogy/${profile?.state}`}
+            >
+              <LocationOnIcon sx={{ marginRight: 1 }} /> {/* Add icon */}
+              <ListItemText primary="State & Culture" />
+            </ListItem>
+
+            {/* Family Details */}
+            <ListItem button>
+              <DetailsIcon sx={{ marginRight: 1 }} /> {/* Add icon */}
+              <ListItemText primary="Family Details" />
+            </ListItem>
+
+            {/* About */}
+            <ListItem button>
+              <InfoIcon sx={{ marginRight: 1 }} /> {/* Add icon */}
+              <ListItemText primary="About" />
+            </ListItem>
+          </List>
         </Box>
-      </Modal>
-    </React.Fragment>
+      </section>
+
+      {/* Main Content */}
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Typography
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            width: "100%",
+            maxWidth: 600,
+            justifyContent: "space-between",
+            marginBottom: 2,
+          }}
+          variant="h4"
+          gutterBottom
+        >
+          {/* Left side: H2 heading */}
+          <h2 className="text-black text-2xl md:text-xl font-bold uppercase font-Montserrat text-left">
+            ABOUT {profile?.lastName} {profile?.firstName} {profile?.middlename}
+          </h2>
+
+          {/* Right side: Button */}
+          <Link to={`/view-tree/${userId}`}>
+            <button className="bg-green text-white text-xs mx-2 rounded-2xl w-[9rem] py-2 flex items-center justify-center transition ease-in-out duration-200 transform hover:scale-105 Nlg:hidden">
+              <span className="mr-2"> Go to Tree</span>
+              <DirectionButton2 />
+            </button>
+          </Link>
+        </Typography>
+
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            width: "100%",
+            maxWidth: 600,
+            marginLeft: 0,
+          }}
+        >
+          <Avatar
+            src={imageSrc}
+            alt={`${profile?.firstName} ${profile?.lastName}`}
+            sx={{
+              width: "50vw",
+              height: "30vw",
+              marginBottom: 2,
+              borderRadius: 2,
+            }}
+          />
+          <Typography variant="h5" sx={{ marginBottom: 1, font: 2 }}>
+            {profile?.lastName} {profile?.firstName} {profile?.middlename}
+          </Typography>
+
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: isMobile ? "row" : "row",
+              gap: 2,
+              width: "100%",
+            }}
+          >
+            <Button
+              variant="contained"
+              startIcon={<MessageIcon />}
+              sx={{
+                backgroundColor: "#00d121",
+                color: "white",
+                "&:hover": {
+                  backgroundColor: "darkgreen",
+                },
+                width: { xs: "auto", sm: "auto", md: "auto" },
+                fontSize: { xs: "0.75rem", sm: "0.75rem" },
+                padding: { xs: "6px 8px", sm: "8px 16px" },
+              }}
+            >
+              Message
+            </Button>
+
+            <Button
+              variant="contained"
+              startIcon={<PersonAddIcon />}
+              sx={{
+                backgroundColor: "#00d121",
+                color: "white",
+                "&:hover": {
+                  backgroundColor: "darkgreen",
+                },
+                width: { xs: "auto", sm: "auto", md: "auto" },
+                fontSize: { xs: "0.75rem", sm: "0.75rem" },
+                padding: { xs: "6px 8px", sm: "8px 16px" },
+              }}
+            >
+              Connect
+            </Button>
+
+            <Button
+              variant="contained"
+              startIcon={<PersonAddIcon />}
+              sx={{
+                backgroundColor: "#00d121",
+                color: "white",
+                "&:hover": {
+                  backgroundColor: "darkgreen",
+                },
+                width: { xs: "auto", sm: "auto", md: "auto" },
+                fontSize: { xs: "0.75rem", sm: "0.75rem" },
+                padding: { xs: "6px 8px", sm: "8px 16px" },
+              }}
+            >
+              Connect
+            </Button>
+          </Box>
+        </Box>
+
+        {/* Personal Details */}
+        <StyledPaper elevation={3}>
+          <Typography variant="h6" gutterBottom>
+            Personal Details
+          </Typography>
+          <Grid container spacing={2}>
+            {[
+              { label: "Phone Number", value: profile?.phoneNumber },
+              { label: "Email", value: profile?.email },
+              { label: "State of Origin", value: profile?.state },
+              { label: "Local Government", value: profile?.lga },
+              { label: "Autonomous Community", value: profile?.autonomous },
+              { label: "Kindred", value: profile?.kindred },
+              { label: "Religion", value: profile?.religion },
+              { label: "Tribe", value: profile?.tribe },
+              { label: "Profession", value: profile?.profession },
+            ].map((item, index) => (
+              <Grid item xs={12} sm={6} key={index}>
+                <Typography variant="subtitle2">
+                  <span className=" font-bold">{item.label}</span>:
+                </Typography>
+                <Typography variant="body2">
+                  {item.value || "Unavailable"}
+                </Typography>
+              </Grid>
+            ))}
+          </Grid>
+        </StyledPaper>
+
+        {/* Social Links */}
+        <StyledPaper elevation={3}>
+          <Typography variant="h6" gutterBottom>
+            Social Media
+          </Typography>
+          <Box sx={{ display: "flex", gap: 2 }}>
+            <IconButton href={profile?.twitter} target="_blank">
+              <TwitterIcon />
+            </IconButton>
+            <IconButton
+              href={`https://wa.me/${profile?.phoneNumber}`}
+              target="_blank"
+            >
+              <WhatsAppIcon />
+            </IconButton>
+            <IconButton href={profile?.facebook} target="_blank">
+              <FacebookIcon />
+            </IconButton>
+            <IconButton href={profile?.instagram} target="_blank">
+              <InstagramIcon />
+            </IconButton>
+          </Box>
+        </StyledPaper>
+
+        {/* Birthday Countdown */}
+        <BirthdayCard>
+          <Typography variant="h5" gutterBottom>
+            {profile?.firstName}'s birthday is in {daysUntilBirthday}{" "}
+            {daysUntilBirthday === 1 ? "day" : "days"}
+          </Typography>
+          <Typography variant="body2" sx={{ maxWidth: "80%" }}>
+            On days like this, Essential Groups advises visitors like yourself
+            to find a way to wish this person a happy birthday. You can use our
+            provided social media handles, and if this person is deceased, you
+            can still get through to any family member through our platform
+            here.
+          </Typography>
+        </BirthdayCard>
+
+        {/* About Section */}
+        {profile?.about && (
+          <StyledPaper elevation={3}>
+            <Typography variant="h6" gutterBottom>
+              Background
+            </Typography>
+            <Typography variant="body2"> {getText(profile.about)}</Typography>
+          </StyledPaper>
+        )}
+
+        {/* Family Details */}
+        <StyledPaper elevation={3}>
+          <Typography variant="h6" gutterBottom>
+            Family Photos
+          </Typography>
+          <FamilyDetails />
+        </StyledPaper>
+
+        {/* Related Profiles Carousel */}
+        {relatedProfiles.length > 0 && (
+          <StyledPaper elevation={3}>
+            <Typography variant="h6" gutterBottom>
+              Great People Bearing This Name
+            </Typography>
+            <CarouselContainer>
+              <CarouselButton
+                onClick={() => handleCarouselScroll("left")}
+                sx={{ left: 0 }}
+              >
+                <ChevronLeftIcon />
+              </CarouselButton>
+              <CarouselTrack ref={carouselRef}>
+                {relatedProfiles.map((item) => (
+                  <CarouselCard key={item._id}>
+                    <CardContent>
+                      <Avatar
+                        src={
+                          item.image ? `${backendURL}/${item.image}` : noProfile
+                        }
+                        alt={item.firstName}
+                        sx={{ width: 100, height: 100, margin: "auto" }}
+                      />
+                      <Typography variant="h6" align="center">
+                        {item.lastName} {item.firstName} {item.middleName}
+                      </Typography>
+                      <Typography variant="body2" align="center">
+                        {item.profession}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        align="center"
+                        color="text.secondary"
+                      >
+                        {item.gender}
+                      </Typography>
+                    </CardContent>
+                  </CarouselCard>
+                ))}
+              </CarouselTrack>
+              <CarouselButton
+                onClick={() => handleCarouselScroll("right")}
+                sx={{ right: 0 }}
+              >
+                <ChevronRightIcon />
+              </CarouselButton>
+            </CarouselContainer>
+          </StyledPaper>
+        )}
+      </Box>
+    </Box>
   );
 }
 
-export default ChildModal;
-
-export const NestedModal = React.forwardRef(({ userId }, ref2) => {
-  const CACHE_TIME = 30 * 60 * 1000; // 30 minutes
-  const dispatch = useDispatch();
-  const [open, setOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const [imagePreview, setImagePreview] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
-
-  const { Dloading, Derror, Dsuccess } = useSelector(
-    (state) => state.delete.person
-  );
-  const {
-    data: allData,
-    lastFetched,
-    loading,
-  } = useSelector((state) => state.form.fetchDetails);
-  const userInfo = useSelector((state) => state.auth.user);
-  const LoggedId = userInfo?.id;
-
-  const personData = allData?.person;
-
-  const shouldFetchData = useCallback(() => {
-    if (!lastFetched) return true;
-    return Date.now() - lastFetched > CACHE_TIME;
-  }, [lastFetched]);
-
-  useEffect(() => {
-    if (open && userId && shouldFetchData()) {
-      dispatch(fetchAllDetails(userId));
-    }
-  }, [dispatch, userId, shouldFetchData, open]);
-
-  useEffect(() => {
-    if (Dsuccess) {
-      toast.success("Deleted!");
-      dispatch(resetDeleteState());
-      dispatch(invalidateCache());
-      dispatch(fetchAllDetails(userId));
-    }
-  }, [Dsuccess, dispatch, userId]);
-
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-  const toggleDropdown = () => setDropdownOpen(!isDropdownOpen);
-
-  const handleDelete = () => {
-    if (fatherData?._id) {
-      dispatch(deletePerson(fatherData._id));
-      setDeleteOpen(false);
-      setOpen(false);
-    } else {
-      console.error("Invalid person ID");
-    }
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file);
-    if (file) {
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!selectedFile || !fatherData?._id) return;
-
-    const formData = new FormData();
-    formData.append("image", selectedFile);
-    formData.append("personId", personData._id);
-
-    try {
-      await dispatch(editPerson(formData));
-      toast.success("Image uploaded successfully!");
-      setImagePreview(null);
-      setSelectedFile(null);
-      dispatch(invalidateCache());
-      dispatch(fetchAllDetails(userId));
-    } catch (error) {
-      toast.error("Failed to upload image");
-    }
-  };
-
-  React.useImperativeHandle(ref2, () => ({
-    openModal: handleOpen,
-  }));
-
-  const yearOfBirth = personData?.DOB
-    ? personData.DOB.split("-")[0]
-    : "Unknown";
-  const yearOfDeath = personData?.yearDeceased
-    ? personData.yearDeceased.split("-")[0]
-    : "Unknown";
-
-  return (
-    <>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="father-modal-title"
-        aria-describedby="father-modal-description"
-      >
-        <Box
-          sx={{
-            ...style,
-            width: 400,
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 6,
-            borderRadius: 2,
-          }}
-        >
-          {personData ? (
-            <div className="w-full max-w-sm bg-white  rounded-lg    relative">
-              {LoggedId === userId ? (
-                <div className="absolute top-0 right-0">
-                  <button
-                    id="dropdownButton"
-                    onClick={toggleDropdown}
-                    className="inline-block text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-500 focus:ring-4 focus:outline-none focus:ring-gray-200 dark:focus:ring-gray-200 rounded-lg text-sm p-1.5"
-                    type="button"
-                  >
-                    <span className="sr-only">Open dropdown</span>
-                    <svg
-                      className="w-5 h-5 text-black hover:text-white"
-                      aria-hidden="true"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="currentColor"
-                      viewBox="0 0 16 3"
-                    >
-                      <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
-                    </svg>
-                  </button>
-                  {/* Dropdown menu */}
-                  {isDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
-                      <ChildModal
-                        initialState={personData}
-                        onSubmit={() => {
-                          dispatch(invalidateCache());
-                          dispatch(fetchAllDetails(userId));
-                        }}
-                        userId={userId}
-                      />
-                      <Button
-                        onClick={() => setDeleteOpen(true)}
-                        className="w-full text-left text-red-600 hover:bg-gray-100"
-                      >
-                        Delete
-                      </Button>
-                      <Button
-                        onClick={toggleDropdown}
-                        className="w-full text-left hover:bg-gray-100"
-                      >
-                        Close
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="my-5 flex justify-end text-end mx-3">
-                  <GrTreeOption size={24} className="text-green" />
-                </div>
-              )}
-
-              <div className="flex flex-col items-center">
-                {personData.image ? (
-                  <img
-                    src={`${backendURL}/${personData.image}?${Date.now()}`}
-                    alt={personData.firstName}
-                    className="w-40 h-40 rounded-full mb-4"
-                  />
-                ) : (
-                  <FaUserCircle className="w-40 h-40 text-gray-400 mb-4" />
-                )}
-                <h2 className="text-xl font-medium text-gray-800 mb-2">
-                  {personData.firstName} {personData.lastName}
-                </h2>
-                <p className="text-sm text-gray-500 mb-1">
-                  {personData.Lstatus !== "Deceased"
-                    ? `Born: ${yearOfBirth}`
-                    : `${yearOfBirth} - ${yearOfDeath}`}
-                </p>
-
-                <p className="text-sm text-gray-500 mb-4">
-                  {personData.Lstatus}
-                </p>
-                <div className="flex gap-4">
-                  <Button variant="outlined" color="primary">
-                    Search
-                  </Button>
-                  <Button variant="outlined" color="primary">
-                    Profile
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full">
-              <h2 className="text-lg font-bold mb-2">No Info for this Card</h2>
-              <p className="mb-4">Please add information to this card.</p>
-              <Button
-                href={`/layout/fathers-form/${userId}`}
-                variant="contained"
-                color="primary"
-              >
-                Add Info
-              </Button>
-            </div>
-          )}
-        </Box>
-      </Modal>
-
-      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
-        <DialogTitle>Are you sure you want to delete this item?</DialogTitle>
-        <DialogContent>
-          <DialogContentText>Confirm delete or cancel</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setDeleteOpen(false)}
-            startIcon={<IoClose />}
-            color="secondary"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleDelete}
-            startIcon={<AiTwotoneDelete />}
-            color="error"
-          >
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
-  );
-});
+export default FamilyTreeFeeds;
