@@ -75,55 +75,41 @@ export const FamilyTreeStructure = () => {
 
   console.error(invites, "USERS INVITES");
   const personState = useSelector((state) => state.form);
-  console.log("Complete Person State:", personState);
+  const dataKeys = [
+    "pGFather",
+    "pGMother",
+    "mGFather",
+    "mGMother",
+    "mGrtGrandFather",
+    "mGrtGrandMother",
+    "pGrtGrandFather",
+    "pGrtGrandMother",
+    "person",
+    "father",
+    "mother",
+  ];
 
+  const fetchDetails = personState?.fetchDetails?.data;
+
+  const data = dataKeys.reduce((acc, key) => {
+    acc[key] = fetchDetails[key];
+    return acc;
+  }, {});
+
+  // Now you can access each piece of data easily
   const {
-    person: personData,
-    father: fatherData,
-    mother: motherData,
-    MGF: MGFData,
-    MGM: MGMData,
-    PGF: PGFData,
-    PGM: PGMData,
-    PGGF: PGGFData,
-    PGGM: PGGMData,
-    MGGF: MGGFData,
-    MGGM: MGGMData,
-  } = useSelector((state) => state.person);
-
-  console.log("Person Data:", personData);
-  console.log("Father Data:", fatherData);
-  console.log("Mother Data:", motherData);
-  console.log("MGF Data:", MGFData);
-  console.log("MGM Data:", MGMData);
-  console.log("PGF Data:", PGFData);
-  console.log("PGM Data:", PGMData);
-  console.log("PGGF Data:", PGGFData);
-  console.log("PGGM Data:", PGGMData);
-  console.log("MGGF Data:", MGGFData);
-  console.log("MGGM Data:", MGGMData);
-
-  // Access the entire state
-  // const personState = useSelector((state) => state.form);
-  // console.log("Complete Person State:", personState);
-
-  // const {
-  //   fetchDetails: {
-  //     data: {
-  //       person: personData = null,
-  //       father: fatherData = null,
-  //       mother: motherData = null,
-  //       mGFather: MGFData = null,
-  //       mGMother: MGMData = null,
-  //       pGFather: PGFData = null,
-  //       pGMother: PGMData = null,
-  //       pGrtGrandFather: PGGFData = null,
-  //       pGrtGrandMother: PGGMData = null,
-  //       mGrtGrandFather: MGGFData = null,
-  //       mGrtGrandMother: MGGMData = null,
-  //     } = {},
-  //   } = {},
-  // } = useSelector((state) => state.form) || {};
+    PGFData: PGFData = data.pGFather,
+    PGMData: PGMData = data.pGMother,
+    MGFData: MGFData = data.mGFather,
+    MGMData: MGMData = data.mGMother,
+    MGGFData: MGGFData = data.mGrtGrandFather,
+    MGGMData: MGGMData = data.mGrtGrandMother,
+    PGGFData: PGGFData = data.pGrtGrandFather,
+    PGGMData: PGGMData = data.pGrtGrandMother,
+    personData: personData = data.person,
+    fatherData: fatherData = data.father,
+    motherData: motherData = data.mother,
+  } = data;
 
   const personCard =
     personData && Object.keys(personData).length > 0

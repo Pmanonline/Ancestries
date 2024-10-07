@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchStateDetails } from "../features/Statefeature/stateAction";
 import Spinner from "../components/tools/Spinner";
 import { DirectionButton2 } from "../components/d-button";
+
 const backendURL =
   import.meta.env.MODE === "production"
     ? import.meta.env.VITE_BACKEND_URL
@@ -13,48 +14,60 @@ function Genealogy() {
   const { stateName } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { allStates, specificState, religions, error } = useSelector(
+  const { allStates, specificState, religions, loading, error } = useSelector(
     (state) => state.state
   );
-  console.log(religions);
-  console.log(allStates);
-  const [loading, setLoading] = useState(true);
+
   const [selectedState, setSelectedState] = useState(stateName || "");
   const [selectedLocalGovernment, setSelectedLocalGovernment] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredStates, setFilteredStates] = useState([]);
 
-  useEffect(() => {
-    if (
-      specificState?.localGovernments &&
-      specificState.localGovernments.length > 0
-    ) {
-      setSelectedLocalGovernment(specificState.localGovernments[0]);
-    }
-  }, [specificState?.localGovernments]);
-
-  const handleSelectChange = (event) => {
-    const selectedName = event.target.value;
-    const selectedArea = specificState.localGovernments.find(
-      (area) => area.name === selectedName
+  const filteredStates = useMemo(() => {
+    if (!searchTerm) return allStates;
+    return allStates.filter((state) =>
+      state.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    setSelectedLocalGovernment(selectedArea);
-  };
+  }, [searchTerm, allStates]);
+
+  const handleSelectChange = useCallback(
+    (event) => {
+      const selectedName = event.target.value;
+      const selectedArea = specificState.localGovernments.find(
+        (area) => area.name === selectedName
+      );
+      setSelectedLocalGovernment(selectedArea);
+    },
+    [specificState]
+  );
+
+  const handleChange = useCallback((event) => {
+    setSelectedState(event.target.value);
+  }, []);
+
+  const handleSearch = useCallback(() => {
+    const stateFound = filteredStates[0];
+    if (stateFound) {
+      setSelectedState(stateFound.name);
+      setSearchTerm("");
+    } else {
+      alert("State not found");
+    }
+  }, [filteredStates]);
+
+  const handleScroll = useCallback(() => {
+    const element = document.getElementById("localGovernment");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
 
   useEffect(() => {
-    dispatch(fetchStateDetails()) // Fetch all states
-      .unwrap()
-      .then(() => setLoading(false))
-      .catch(() => setLoading(false));
+    dispatch(fetchStateDetails());
   }, [dispatch]);
 
   useEffect(() => {
     if (selectedState) {
-      setLoading(true);
-      dispatch(fetchStateDetails(selectedState))
-        .unwrap()
-        .then(() => setLoading(false))
-        .catch(() => setLoading(false));
+      dispatch(fetchStateDetails(selectedState));
     }
   }, [dispatch, selectedState]);
 
@@ -78,45 +91,16 @@ function Genealogy() {
     }
   }, [stateName, navigate]);
 
-  const handleChange = (event) => {
-    setSelectedState(event.target.value);
-  };
-
-  const handleSearch = () => {
-    const stateFound = filteredStates.length > 0 ? filteredStates[0] : null;
-    if (stateFound) {
-      setSelectedState(stateFound.name);
-      setSearchTerm(""); // Clear search input
-    } else {
-      alert("State not found");
-    }
-  };
-
   useEffect(() => {
-    if (searchTerm) {
-      const filtered = allStates.filter((state) =>
-        state.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredStates(filtered);
-    } else {
-      setFilteredStates(allStates);
+    if (specificState?.localGovernments?.length > 0) {
+      setSelectedLocalGovernment(specificState.localGovernments[0]);
     }
-  }, [searchTerm, allStates]);
-  const handleScroll = () => {
-    const element = document.getElementById("localGovernment");
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  }, [specificState?.localGovernments]);
 
-  if (loading)
-    return (
-      <>
-        <Spinner />
-      </>
-    );
+  if (loading) return <Spinner />;
   if (error) return <p>Error: {error}</p>;
   if (!specificState) return <p>No details available for {selectedState}</p>;
+
   return (
     <>
       <div className="flex justify-start">

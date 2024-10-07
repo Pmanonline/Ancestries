@@ -72,12 +72,12 @@
 
 //   // // If profile data is available, use its name for filtering profiles
 
-// const relatedProfiles = profiles.filter(
-//   (p) =>
-//     (p.firstName === profile?.firstName ||
-//       p.lastName === profile?.lastName) &&
-//     p._id !== userId // Exclude the user whose id matches the id from params
-// );
+//   const relatedProfiles = profiles.filter(
+//     (p) =>
+//       (p.firstName === profile?.firstName ||
+//         p.lastName === profile?.lastName) &&
+//       p._id !== userId // Exclude the user whose id matches the id from params
+//   );
 
 //   const { allStates, religions, tribes } = useSelector((state) => state.state);
 
@@ -86,29 +86,29 @@
 //   }
 
 //   // Find the state based on the user's selected state
-// const stateName = profile?.state;
-// const ReligionNam = profile?.religion;
-// const TribeName = profile?.tribe;
-// console.log("Profile State:", stateName, ReligionNam, TribeName);
+//   const stateName = profile?.state;
+//   const ReligionNam = profile?.religion;
+//   const TribeName = profile?.tribe;
+//   console.log("Profile State:", stateName, ReligionNam, TribeName);
 
-// // Format the state name to match the names in allStates
-// const formattedStateName = stateName ? `${stateName} State` : "";
-// console.log("Formatted State Name:", formattedStateName);
+//   // Format the state name to match the names in allStates
+//   const formattedStateName = stateName ? `${stateName} State` : "";
+//   console.log("Formatted State Name:", formattedStateName);
 
-// // Find the state based on the formatted state name
-// const userStateOfOrigin = allStates?.find(
-//   (state) => state.name === formattedStateName
-// );
-// console.log("User State of Origin:", userStateOfOrigin);
-// // Create the complete state name if needed
+//   // Find the state based on the formatted state name
+//   const userStateOfOrigin = allStates?.find(
+//     (state) => state.name === formattedStateName
+//   );
+//   console.log("User State of Origin:", userStateOfOrigin);
+//   // Create the complete state name if needed
 
-// // check and display religions details
-// const ReligionDetails = religions?.find(
-//   (state) => state.religionName === ReligionNam
-// );
+//   // check and display religions details
+//   const ReligionDetails = religions?.find(
+//     (state) => state.religionName === ReligionNam
+//   );
 
-// // check and display tribes details
-// const TribesDetails = tribes?.find((tribe) => tribe?.tribeName === TribeName);
+//   // check and display tribes details
+//   const TribesDetails = tribes?.find((tribe) => tribe?.tribeName === TribeName);
 
 //   useEffect(() => {
 //     dispatch(fetchStateDetails()) // Fetch all states
@@ -138,21 +138,21 @@
 //     return <div>No profile data available.</div>;
 //   }
 
-// const formattedDate = profile.DOB
-//   ? moment(profile.DOB).format("DD MMMM YYYY")
-//   : "Date not available";
+//   const formattedDate = profile.DOB
+//     ? moment(profile.DOB).format("DD MMMM YYYY")
+//     : "Date not available";
 //   const daysUntilBirthday = calculateBirthdayCountdown(formattedDate);
 
-// const imageSrc = profile?.image
-//   ? `${backendURL}/${profile.image}`
-//   : noProfile;
+//   const imageSrc = profile?.image
+//     ? `${backendURL}/${profile.image}`
+//     : noProfile;
 //   const imageSrc2 = profile?.image2
 //     ? `${backendURL}/${profile.image2}`
 //     : noProfile; // Same logic for image2
-// const getText = (html) => {
-//   const doc = new DOMParser().parseFromString(html, "text/html");
-//   return doc.body.textContent;
-// };
+//   const getText = (html) => {
+//     const doc = new DOMParser().parseFromString(html, "text/html");
+//     return doc.body.textContent;
+//   };
 
 //   const handleStartChat = async () => {
 //     try {
@@ -307,14 +307,14 @@
 //           </div>
 //         </div>
 //         <div className="ml-2">
-// <Link to={`/view-tree/${userId}`}>
-//   <button className="bg-green text-white rounded-2xl w-[9rem] py-2 flex items-center justify-center transition ease-in-out duration-200 transform hover:scale-105">
-//     Go to Tree
-//     <span className="ml-2">
-//       <DirectionButton2 />
-//     </span>
-//   </button>
-// </Link>
+//           <Link to={`/view-tree/${userId}`}>
+//             <button className="bg-green text-white rounded-2xl w-[9rem] py-2 flex items-center justify-center transition ease-in-out duration-200 transform hover:scale-105">
+//               Go to Tree
+//               <span className="ml-2">
+//                 <DirectionButton2 />
+//               </span>
+//             </button>
+//           </Link>
 //         </div>
 //       </div>
 //       {profile.about && (
@@ -418,42 +418,42 @@
 //               </button>
 //             </div> */}
 
-// {profile.religion && (
-//   <>
-//     <h3 className="text-black text-lg font-bold uppercase mb-3">
-//       State religion
-//     </h3>
-//     <button className="text-white bg-green text-lg font-bold uppercase mb-1 p-1 rounded-xs">
-//       {profile.religion}
-//     </button>
-//     <div className="">
-//       <p className="text-black text-sm font-normal">
-//         {ReligionDetails?.description ||
-//           "Religion description not available"}
-//       </p>
-//     </div>
-//   </>
-// )}
+//             {profile.religion && (
+//               <>
+//                 <h3 className="text-black text-lg font-bold uppercase mb-3">
+//                   State religion
+//                 </h3>
+//                 <button className="text-white bg-green text-lg font-bold uppercase mb-1 p-1 rounded-xs">
+//                   {profile.religion}
+//                 </button>
+//                 <div className="">
+//                   <p className="text-black text-sm font-normal">
+//                     {ReligionDetails?.description ||
+//                       "Religion description not available"}
+//                   </p>
+//                 </div>
+//               </>
+//             )}
 //           </div>
 //         </div>
 //       </div>
 
 //       {/* Tribe  */}
-// {profile.tribe && (
-//   <div className="mt-10">
-//     <h3 className="text-black  text-lg font-bold uppercase  text-start mb-4">
-//       Tribe
-//     </h3>
-//     <button className="text-white bg-green text-lg font-bold uppercase mb-1 p-1 rounded-xs">
-//       {profile.tribe}
-//     </button>
-//     <div className="">
-//       <p className="text-black text-sm font-normal">
-//         {TribesDetails?.description || "Tribe description not available"}
-//       </p>
-//     </div>
-//   </div>
-// )}
+//       {profile.tribe && (
+//         <div className="mt-10">
+//           <h3 className="text-black  text-lg font-bold uppercase  text-start mb-4">
+//             Tribe
+//           </h3>
+//           <button className="text-white bg-green text-lg font-bold uppercase mb-1 p-1 rounded-xs">
+//             {profile.tribe}
+//           </button>
+//           <div className="">
+//             <p className="text-black text-sm font-normal">
+//               {TribesDetails?.description || "Tribe description not available"}
+//             </p>
+//           </div>
+//         </div>
+//       )}
 
 //       {/*   */}
 //       <div className="mt-10">
@@ -545,6 +545,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchStateDetails } from "../../features/Statefeature/stateAction";
 import moment from "moment";
 import { DirectionButton2 } from "../../components/d-button";
+import SearchUsers from "../../components/tools/SearchUsers";
+import { RecentSearches } from "../../components/tools/SearchUsers";
 
 import {
   Box,
@@ -565,6 +567,7 @@ import {
   useMediaQuery,
   useTheme,
   Container,
+  CardActionArea,
 } from "@mui/material";
 import {
   Message as MessageIcon,
@@ -601,11 +604,6 @@ const backendURL =
     ? import.meta.env.VITE_BACKEND_URL
     : "http://localhost:8080";
 
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(2),
-  margin: theme.spacing(2, 0),
-}));
-
 const BirthdayCard = styled(Card)(({ theme }) => ({
   backgroundImage: `url(${BirthdayFrame})`,
   backgroundSize: "cover",
@@ -619,12 +617,6 @@ const BirthdayCard = styled(Card)(({ theme }) => ({
     color: theme.palette.common.black,
     textAlign: "center",
   },
-}));
-
-const CarouselContainer = styled(Box)(({ theme }) => ({
-  position: "relative",
-  overflow: "hidden",
-  width: "100%",
 }));
 
 const CarouselTrack = styled(Box)(({ theme }) => ({
@@ -643,6 +635,18 @@ const CarouselCard = styled(Card)(({ theme }) => ({
   scrollSnapAlign: "start",
 }));
 
+const StyledPaper = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2),
+  marginTop: theme.spacing(2),
+  backgroundColor: theme.palette.background.paper,
+  borderRadius: theme.shape.borderRadius,
+}));
+
+const CarouselContainer = styled(Box)({
+  position: "relative",
+  overflow: "hidden",
+});
+
 const CarouselButton = styled(IconButton)(({ theme }) => ({
   position: "absolute",
   top: "50%",
@@ -652,6 +656,26 @@ const CarouselButton = styled(IconButton)(({ theme }) => ({
   "&:hover": {
     backgroundColor: theme.palette.action.hover,
   },
+}));
+
+const StyledCard = styled(Card)(({ theme }) => ({
+  width: 180,
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  padding: theme.spacing(2),
+  transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
+  "&:hover": {
+    transform: "translateY(-5px)",
+    boxShadow: theme.shadows[4],
+  },
+}));
+
+const ProfileAvatar = styled(Avatar)(({ theme }) => ({
+  width: 60,
+  height: 60,
+  marginBottom: theme.spacing(1),
+  border: `2px solid ${theme.palette.primary.main}`,
 }));
 
 function FamilyTreeFeeds() {
@@ -665,10 +689,6 @@ function FamilyTreeFeeds() {
 
   const { profile, profiles, loading } = useSelector((state) => state.person);
   const { allStates, religions, tribes } = useSelector((state) => state.state);
-
-  // if (error) {
-  //   console.error("Error fetching data:", error);
-  // }
 
   // Find the state based on the user's selected state
   const stateName = profile?.state;
@@ -737,14 +757,14 @@ function FamilyTreeFeeds() {
   );
   const carouselRef = useRef(null);
 
+  const handleProfileClick = (userId) => {
+    navigate(`/FamilyTree-feeds/${userId}`);
+  };
+
   const handleCarouselScroll = (direction) => {
-    if (carouselRef.current) {
-      const scrollAmount = 250;
-      carouselRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
-    }
+    const container = carouselRef.current;
+    const scrollAmount = direction === "left" ? -200 : 200;
+    container.scrollBy({ left: scrollAmount, behavior: "smooth" });
   };
 
   const getText = (html) => {
@@ -943,23 +963,7 @@ function FamilyTreeFeeds() {
               <Typography variant="h6" gutterBottom>
                 Social Media
               </Typography>
-              {/* <Box sx={{ display: "flex", gap: 2 }}>
-                <IconButton href={profile?.twitter} target="_blank">
-                  <TwitterIcon />
-                </IconButton>
-                <IconButton
-                  href={`https://wa.me/${profile?.phoneNumber}`}
-                  target="_blank"
-                >
-                  <WhatsAppIcon />
-                </IconButton>
-                <IconButton href={profile?.facebook} target="_blank">
-                  <FacebookIcon />
-                </IconButton>
-                <IconButton href={profile?.instagram} target="_blank">
-                  <InstagramIcon color="primary" />
-                </IconButton>
-              </Box> */}
+
               <Box sx={{ display: "flex", gap: 2, paddingLeft: 2 }}>
                 <IconButton
                   href={profile?.twitter}
@@ -1076,9 +1080,8 @@ function FamilyTreeFeeds() {
               <FamilyDetails />
             </StyledPaper>
 
-            {/* Related Profiles Carousel */}
             {relatedProfiles.length > 0 && (
-              <StyledPaper elevation={3}>
+              <StyledPaper>
                 <Typography variant="h6" gutterBottom>
                   Great People Bearing This Name
                 </Typography>
@@ -1090,38 +1093,36 @@ function FamilyTreeFeeds() {
                     <ChevronLeftIcon />
                   </CarouselButton>
                   <CarouselTrack ref={carouselRef}>
-                    {relatedProfiles.map((item) => (
-                      <CarouselCard key={item._id}>
-                        <CardContent>
-                          <Avatar
-                            src={
-                              item.image
-                                ? `${backendURL}/${item.image}`
-                                : noProfile
-                            }
-                            alt={item.firstName}
-                            sx={{
-                              width: 100,
-                              height: 100,
-                              margin: "auto",
-                              mb: 2,
-                            }}
-                          />
-                          <Typography variant="h6" align="center">
-                            {item.lastName} {item.firstName} {item.middleName}
-                          </Typography>
-                          <Typography variant="body2" align="center">
-                            {item.profession}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            align="center"
-                            color="text.secondary"
-                          >
-                            {item.gender}
-                          </Typography>
-                        </CardContent>
-                      </CarouselCard>
+                    {relatedProfiles.map((profile) => (
+                      <StyledCard key={profile._id}>
+                        <CardActionArea
+                          onClick={() => handleProfileClick(profile._id)}
+                        >
+                          <CardContent sx={{ textAlign: "center" }}>
+                            <ProfileAvatar
+                              src={
+                                profile.image
+                                  ? `${backendURL}/${profile.image}`
+                                  : noProfile
+                              }
+                              alt={profile.firstName}
+                            />
+                            <Typography variant="subtitle2" noWrap>
+                              {`${profile.firstName} ${profile.lastName}`}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              noWrap
+                            >
+                              {profile.profession}
+                            </Typography>
+                            <Typography variant="caption" color="primary">
+                              {profile.gender}
+                            </Typography>
+                          </CardContent>
+                        </CardActionArea>
+                      </StyledCard>
                     ))}
                   </CarouselTrack>
                   <CarouselButton
@@ -1133,6 +1134,25 @@ function FamilyTreeFeeds() {
                 </CarouselContainer>
               </StyledPaper>
             )}
+
+            {/* search */}
+            <div className="mt-24">
+              <h4 className="text-black my-4 text-sm  font-bold   text-center">
+                Dont Find What You Are Looking For?
+              </h4>
+              <p className="mt-4 text-center lg:max-w-[35rem] mx-auto">
+                should lead to more on culture and town, religion, tribe family
+                photograph, highlight position of people on the photo
+              </p>
+
+              {/* form */}
+              <SearchUsers />
+              {/* form */}
+
+              {/* related searches */}
+              <RecentSearches />
+              {/* related searches */}
+            </div>
           </Box>
         </Grid>
       </Grid>

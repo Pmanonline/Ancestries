@@ -828,6 +828,619 @@
 //   );
 //   }
 
+// import React, { useState, useEffect, useRef } from "react";
+// import { useParams } from "react-router-dom";
+// import ReactQuill from "react-quill";
+// import "react-quill/dist/quill.snow.css";
+// import { useDispatch, useSelector } from "react-redux";
+// import { resetSuccess } from "../features/UserFeature/UserSlice";
+// import { statesAndLGAs } from "../assets/json-datas/State/LGAs.json";
+// import {
+//   createFamilyMember,
+//   getProfile,
+// } from "../features/UserFeature/UserAction";
+// import Spinner from "../components/tools/Spinner";
+
+// // MUI imports
+// import {
+//   TextField,
+//   Button,
+//   Grid,
+//   Typography,
+//   Box,
+//   Avatar,
+//   IconButton,
+//   Select,
+//   MenuItem,
+//   FormControl,
+//   InputLabel,
+//   Snackbar,
+//   Alert,
+//   Paper,
+//   ImageList,
+//   ImageListItem,
+//   ImageListItemBar,
+// } from "@mui/material";
+// import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
+// import FacebookIcon from "@mui/icons-material/Facebook";
+// import TwitterIcon from "@mui/icons-material/Twitter";
+// import InstagramIcon from "@mui/icons-material/Instagram";
+// import DeleteIcon from "@mui/icons-material/Delete";
+
+// const backendURL =
+//   import.meta.env.MODE === "production"
+//     ? import.meta.env.VITE_BACKEND_URL
+//     : "http://localhost:8080";
+// const initialFormData = {
+//   background: "",
+//   firstName: "",
+//   lastName: "",
+//   DOB: "",
+//   phoneNumber: "",
+//   streetAddress: "",
+//   lga: "",
+//   state: "",
+//   kindred: "",
+//   village: "",
+//   autonomous: "",
+//   tribe: "",
+//   religion: "",
+//   profession: "",
+//   facebook: "",
+//   twitter: "",
+//   instagram: "",
+//   about: "",
+//   image: "",
+//   images: [],
+//   captions: [],
+// };
+
+// export default function Profile() {
+//   const dispatch = useDispatch();
+//   const { id } = useParams();
+//   const { userInfo } = useSelector((state) => state.auth);
+//   const { profile, loading, error } = useSelector((state) => state.person);
+//   const [formData, setFormData] = useState(() => {
+//     const savedFormData = JSON.parse(localStorage.getItem("formData"));
+//     return savedFormData || initialFormData;
+//   });
+//   const [snackbar, setSnackbar] = useState({
+//     open: false,
+//     message: "",
+//     severity: "info",
+//   });
+//   const [imagePreview, setImagePreview] = useState(null);
+//   const [imagePreviews2, setImagePreviews2] = useState([]);
+//   const [lgaOptions, setLgaOptions] = useState([]);
+
+//   const fileInputRef = useRef(null);
+//   const fileInputRef2 = useRef(null);
+
+//   const userId = userInfo?.user._id || id;
+
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       if (userId) {
+//         try {
+//           await dispatch(getProfile(userId)).unwrap();
+//         } catch (error) {
+//           console.error("Failed to fetch profile data:", error);
+//         }
+//       }
+//     };
+
+//     fetchData();
+//   }, [dispatch, userId]);
+
+//   useEffect(() => {
+//     if (profile) {
+//       setFormData((prevState) => ({
+//         ...prevState,
+//         ...profile,
+//         image: profile.image || prevState.image,
+//         images: Array.isArray(profile.images)
+//           ? profile.images
+//           : prevState.images,
+//         captions: profile.images
+//           ? profile.images.map((img) => img.caption || "")
+//           : prevState.captions,
+//       }));
+
+//       setImagePreview(profile.image ? `${backendURL}/${profile.image}` : null);
+
+//       setImagePreviews2(
+//         Array.isArray(profile.images)
+//           ? profile.images.map((img) => `${backendURL}/${img.path}`)
+//           : []
+//       );
+//     }
+//   }, [profile]);
+
+//   useEffect(() => {
+//     if (!profile) {
+//       localStorage.removeItem("formData", JSON.stringify(formData));
+//     }
+//   }, [formData, profile]);
+
+//   const handleChange = (e) => {
+//     const { name, value, type, files } = e.target;
+//     setFormData((prevState) => ({
+//       ...prevState,
+//       [name]: type === "file" ? files[0] : value,
+//     }));
+//   };
+
+//   const handleFileChange = (e) => {
+//     const file = e.target.files[0];
+//     setFormData((prevState) => ({
+//       ...prevState,
+//       image: file,
+//     }));
+//     setImagePreview(URL.createObjectURL(file));
+//   };
+
+//   const handleDeleteImage = async (index) => {
+//     const token = localStorage.getItem("userToken");
+//     try {
+//       const response = await fetch(`${backendURL}/api/family-image/${index}`, {
+//         method: "DELETE",
+//         headers: {
+//           Authorization: `Bearer ${token}`, // Ensure you're sending the auth token
+//         },
+//       });
+
+//       if (!response.ok) {
+//         throw new Error("Failed to delete image");
+//       }
+
+//       // If deletion was successful, update local state
+//       setFormData((prevState) => {
+//         const newImages = [...prevState.images];
+//         const newCaptions = [...prevState.captions];
+//         newImages.splice(index, 1);
+//         newCaptions.splice(index, 1);
+//         return { ...prevState, images: newImages, captions: newCaptions };
+//       });
+//       setImagePreviews2((prevPreviews) => {
+//         const newPreviews = [...prevPreviews];
+//         newPreviews.splice(index, 1);
+//         return newPreviews;
+//       });
+//     } catch (error) {
+//       console.error("Error deleting image:", error);
+//       // Handle error (e.g., show an error message to the user)
+//     }
+//   };
+//   const handleFileChange2 = (e) => {
+//     const files = Array.from(e.target.files);
+//     const newImagePreviews = files.map((file) => URL.createObjectURL(file));
+//     setFormData((prevState) => ({
+//       ...prevState,
+//       images: files,
+//       captions: new Array(files.length).fill(""),
+//     }));
+//     setImagePreviews2(newImagePreviews);
+//   };
+
+//   const handleCaptionChange = (index, value) => {
+//     setFormData((prevState) => {
+//       const newCaptions = [...prevState.captions];
+//       newCaptions[index] = value;
+//       return { ...prevState, captions: newCaptions };
+//     });
+//   };
+
+//   const handleStateChange = (e) => {
+//     const { value } = e.target;
+//     setFormData((prevState) => ({
+//       ...prevState,
+//       state: value,
+//       lga: "",
+//     }));
+//     // Update LGA options when state changes
+//     const selectedState = statesAndLGAs.find((state) => state.name === value);
+//     setLgaOptions(selectedState ? selectedState.local_governments : []);
+//   };
+
+//   const handleLGAChange = (e) => {
+//     const { value } = e.target;
+//     setFormData((prevState) => ({
+//       ...prevState,
+//       lga: value,
+//     }));
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+
+//     const data = new FormData();
+//     Object.keys(formData).forEach((key) => {
+//       if (key === "images") {
+//         formData.images.forEach((file) => data.append("images", file));
+//       } else if (key === "captions") {
+//         formData.captions.forEach((caption, index) =>
+//           data.append(`captions[${index}]`, caption)
+//         );
+//       } else {
+//         data.append(key, formData[key]);
+//       }
+//     });
+
+//     try {
+//       await dispatch(
+//         createFamilyMember({
+//           memberType: "profile",
+//           formData: data,
+//         })
+//       ).unwrap();
+//       setSnackbar({
+//         open: true,
+//         message: "Profile updated successfully!",
+//         severity: "success",
+//       });
+//       dispatch(resetSuccess());
+//       dispatch(getProfile(userId)).unwrap();
+//     } catch (error) {
+//       setSnackbar({
+//         open: true,
+//         message: "Failed to update profile. Please try again.",
+//         severity: "error",
+//       });
+//     }
+//   };
+
+//   const handleQuillChange = (value) => {
+//     setFormData((prevData) => ({
+//       ...prevData,
+//       about: value,
+//     }));
+//   };
+
+//   const handleCloseSnackbar = (event, reason) => {
+//     if (reason === "clickaway") {
+//       return;
+//     }
+//     setSnackbar({ ...snackbar, open: false });
+//   };
+
+//   return (
+//     <Box sx={{ p: 3 }}>
+//       <Paper elevation={1} sx={{ p: 4 }}>
+//         <Box sx={{ marginBottom: 5 }} className="mb-5">
+//           <Typography variant="h4" gutterBottom>
+//             Personal Information
+//           </Typography>
+//           <Typography variant="body1" gutterBottom>
+//             Please fill all fields as accurately as possible
+//           </Typography>
+//         </Box>
+
+//         <form onSubmit={handleSubmit}>
+//           {/* <Grid container spacing={4}> */}
+//           {/* ... (keep other form fields) */}
+//           <Grid container spacing={4}>
+//             <Grid item xs={12} md={4}>
+//               <Box display="flex" flexDirection="column" alignItems="center">
+//                 <Avatar
+//                   src={imagePreview}
+//                   sx={{ width: 150, height: 150, mb: 2 }}
+//                 />
+//                 <input
+//                   ref={fileInputRef}
+//                   type="file"
+//                   hidden
+//                   onChange={handleFileChange}
+//                 />
+//                 <Button
+//                   variant="contained"
+//                   startIcon={<AddAPhotoIcon />}
+//                   onClick={() => fileInputRef.current.click()}
+//                 >
+//                   Change Photo
+//                 </Button>
+//               </Box>
+//             </Grid>
+
+//             <Grid item xs={12} md={8}>
+//               <Grid container spacing={2}>
+//                 <Grid item xs={12} sm={6}>
+//                   <TextField
+//                     fullWidth
+//                     label="First Name"
+//                     name="firstName"
+//                     value={formData.firstName}
+//                     onChange={handleChange}
+//                   />
+//                 </Grid>
+//                 <Grid item xs={12} sm={6}>
+//                   <TextField
+//                     fullWidth
+//                     label="Last Name"
+//                     name="lastName"
+//                     value={formData.lastName}
+//                     onChange={handleChange}
+//                   />
+//                 </Grid>
+//                 <Grid item xs={12} sm={6}>
+//                   <TextField
+//                     fullWidth
+//                     label="Middle Name"
+//                     name="middlename"
+//                     value={formData.middlename}
+//                     onChange={handleChange}
+//                   />
+//                 </Grid>
+//                 <Grid item xs={12} sm={6}>
+//                   <TextField
+//                     fullWidth
+//                     label="Phone Number"
+//                     name="phoneNumber"
+//                     value={formData.phoneNumber}
+//                     onChange={handleChange}
+//                   />
+//                 </Grid>
+//                 <Grid item xs={12} sm={6}>
+//                   <FormControl fullWidth>
+//                     <InputLabel>State of Origin</InputLabel>
+//                     <Select
+//                       name="state"
+//                       value={formData.state}
+//                       onChange={handleStateChange}
+//                     >
+//                       <MenuItem value="">Select a state</MenuItem>
+//                       {statesAndLGAs.map((state) => (
+//                         <MenuItem key={state.id} value={state.name}>
+//                           {state.name}
+//                         </MenuItem>
+//                       ))}
+//                     </Select>
+//                   </FormControl>
+//                 </Grid>
+//                 <Grid item xs={12} sm={6}>
+//                   <FormControl fullWidth>
+//                     <InputLabel>Local Government Area</InputLabel>
+//                     <Select
+//                       name="lga"
+//                       value={formData.lga}
+//                       onChange={handleLGAChange}
+//                     >
+//                       <MenuItem value="">Select an LGA</MenuItem>
+//                       {lgaOptions.map((lga) => (
+//                         <MenuItem key={lga.id} value={lga.name}>
+//                           {lga.name}
+//                         </MenuItem>
+//                       ))}
+//                     </Select>
+//                   </FormControl>
+//                 </Grid>
+//                 <Grid item xs={12} sm={6}>
+//                   <TextField
+//                     fullWidth
+//                     label="Date of Birth"
+//                     name="DOB"
+//                     type="date"
+//                     value={formData.DOB}
+//                     onChange={handleChange}
+//                     InputLabelProps={{ shrink: true }}
+//                   />
+//                 </Grid>
+//                 <Grid item xs={12} sm={6}>
+//                   <TextField
+//                     fullWidth
+//                     label="Street Address"
+//                     name="streetAddress"
+//                     value={formData.streetAddress}
+//                     onChange={handleChange}
+//                   />
+//                 </Grid>
+//                 <Grid item xs={12} sm={6}>
+//                   <TextField
+//                     fullWidth
+//                     label="Village"
+//                     name="village"
+//                     value={formData.village}
+//                     onChange={handleChange}
+//                   />
+//                 </Grid>
+//                 <Grid item xs={12} sm={6}>
+//                   <TextField
+//                     fullWidth
+//                     label="Autonomous Community"
+//                     name="autonomous"
+//                     value={formData.autonomous}
+//                     onChange={handleChange}
+//                   />
+//                 </Grid>
+//                 <Grid item xs={12} sm={6}>
+//                   <TextField
+//                     fullWidth
+//                     label="Kindred"
+//                     name="kindred"
+//                     value={formData.kindred}
+//                     onChange={handleChange}
+//                   />
+//                 </Grid>
+//                 <Grid item xs={12} sm={6}>
+//                   <FormControl fullWidth>
+//                     <InputLabel>Religion</InputLabel>
+//                     <Select
+//                       name="religion"
+//                       value={formData.religion}
+//                       onChange={handleChange}
+//                     >
+//                       <MenuItem value="">Select a religion</MenuItem>
+//                       <MenuItem value="Christianity">Christianity</MenuItem>
+//                       <MenuItem value="Islam">Islam</MenuItem>
+//                       <MenuItem value="Judaism">Judaism</MenuItem>
+//                       <MenuItem value="Other">Tradition</MenuItem>
+//                     </Select>
+//                   </FormControl>
+//                 </Grid>
+//                 <Grid item xs={12} sm={6}>
+//                   <FormControl fullWidth>
+//                     <InputLabel>Tribe</InputLabel>
+//                     <Select
+//                       name="tribe"
+//                       value={formData.tribe}
+//                       onChange={handleChange}
+//                     >
+//                       <MenuItem value="">Select a tribe</MenuItem>
+//                       <MenuItem value="Igbo">Igbo</MenuItem>
+//                       <MenuItem value="Yoruba">Yoruba</MenuItem>
+//                       <MenuItem value="Hausa-Fulani">Hausa-Fulani</MenuItem>
+//                       <MenuItem value="Ijaw">Ijaw</MenuItem>
+//                       <MenuItem value="Kanuri">Kanuri</MenuItem>
+//                       <MenuItem value="Other">Other</MenuItem>
+//                     </Select>
+//                   </FormControl>
+//                 </Grid>
+//                 <Grid item xs={12} sm={6}>
+//                   <TextField
+//                     fullWidth
+//                     label="Profession"
+//                     name="profession"
+//                     value={formData.profession}
+//                     onChange={handleChange}
+//                   />
+//                 </Grid>
+//               </Grid>
+//             </Grid>
+
+//             <Grid item xs={12}>
+//               <Typography variant="h6" gutterBottom>
+//                 Social Media
+//               </Typography>
+//               <Grid container spacing={2}>
+//                 <Grid item xs={12} sm={4}>
+//                   <TextField
+//                     fullWidth
+//                     label="Facebook"
+//                     name="facebook"
+//                     value={formData.facebook}
+//                     onChange={handleChange}
+//                     InputProps={{
+//                       startAdornment: <FacebookIcon />,
+//                     }}
+//                   />
+//                 </Grid>
+//                 <Grid item xs={12} sm={4}>
+//                   <TextField
+//                     fullWidth
+//                     label="Twitter"
+//                     name="twitter"
+//                     value={formData.twitter}
+//                     onChange={handleChange}
+//                     InputProps={{
+//                       startAdornment: <TwitterIcon />,
+//                     }}
+//                   />
+//                 </Grid>
+//                 <Grid item xs={12} sm={4}>
+//                   <TextField
+//                     fullWidth
+//                     label="Instagram"
+//                     name="instagram"
+//                     value={formData.instagram}
+//                     onChange={handleChange}
+//                     InputProps={{
+//                       startAdornment: <InstagramIcon />,
+//                     }}
+//                   />
+//                 </Grid>
+//               </Grid>
+//             </Grid>
+//             <Grid item xs={12}>
+//               <Typography variant="h6" gutterBottom>
+//                 Background
+//               </Typography>
+//               <ReactQuill
+//                 value={formData.about}
+//                 onChange={handleQuillChange}
+//                 style={{ height: "200px", marginBottom: "50px" }}
+//               />
+//             </Grid>
+//           </Grid>
+
+//           <Box sx={{ mt: 4 }}>
+//             <Typography variant="h6" gutterBottom>
+//               Family Pictures
+//             </Typography>
+//             <input
+//               ref={fileInputRef2}
+//               type="file"
+//               hidden
+//               multiple
+//               onChange={handleFileChange2}
+//             />
+//             <Button
+//               variant="contained"
+//               startIcon={<AddAPhotoIcon />}
+//               onClick={() => fileInputRef2.current.click()}
+//             >
+//               Add Family Pictures
+//             </Button>
+//             <ImageList sx={{ width: "100%", mt: 2 }} cols={3} rowHeight={200}>
+//               {imagePreviews2.map((item, index) => (
+//                 <ImageListItem key={index} sx={{ height: 280 }}>
+//                   <img
+//                     src={item}
+//                     alt={`Family picture ${index + 1}`}
+//                     loading="lazy"
+//                     style={{ height: 200, objectFit: "cover" }}
+//                   />
+//                   <Box sx={{ p: 1 }}>
+//                     <TextField
+//                       fullWidth
+//                       size="small"
+//                       placeholder="Add caption"
+//                       value={formData.captions[index] || ""}
+//                       onChange={(e) =>
+//                         handleCaptionChange(index, e.target.value)
+//                       }
+//                     />
+//                     <IconButton
+//                       sx={{ mt: 1, fontSize: 5 }}
+//                       aria-label={`delete image ${index + 1}`}
+//                       onClick={() => handleDeleteImage(index)}
+//                     >
+//                       <DeleteIcon size={12} />
+//                     </IconButton>
+//                   </Box>
+//                 </ImageListItem>
+//               ))}
+//             </ImageList>
+//           </Box>
+
+//           <Box sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }}>
+//             <Button
+//               type="submit"
+//               variant="contained"
+//               color="primary"
+//               disabled={loading}
+//             >
+//               {loading ? "Saving..." : "Save"}
+//             </Button>
+//           </Box>
+//         </form>
+//       </Paper>
+
+//       <Snackbar
+//         open={snackbar.open}
+//         autoHideDuration={6000}
+//         onClose={handleCloseSnackbar}
+//       >
+//         <Alert
+//           onClose={handleCloseSnackbar}
+//           severity={snackbar.severity}
+//           sx={{ width: "100%" }}
+//         >
+//           {snackbar.message}
+//         </Alert>
+//       </Snackbar>
+//     </Box>
+//   );
+// }
+
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import ReactQuill from "react-quill";
@@ -857,9 +1470,18 @@ import {
   Snackbar,
   Alert,
   Paper,
+  Card,
+  CardMedia,
+  CardContent,
+  CardActions,
   ImageList,
   ImageListItem,
   ImageListItemBar,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
 import FacebookIcon from "@mui/icons-material/Facebook";
@@ -871,6 +1493,7 @@ const backendURL =
   import.meta.env.MODE === "production"
     ? import.meta.env.VITE_BACKEND_URL
     : "http://localhost:8080";
+
 const initialFormData = {
   background: "",
   firstName: "",
@@ -893,6 +1516,7 @@ const initialFormData = {
   image: "",
   images: [],
   captions: [],
+  gender: "", // Added gender field
 };
 
 export default function Profile() {
@@ -912,6 +1536,8 @@ export default function Profile() {
   const [imagePreview, setImagePreview] = useState(null);
   const [imagePreviews2, setImagePreviews2] = useState([]);
   const [lgaOptions, setLgaOptions] = useState([]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [imageToDelete, setImageToDelete] = useState(null);
 
   const fileInputRef = useRef(null);
   const fileInputRef2 = useRef(null);
@@ -944,6 +1570,7 @@ export default function Profile() {
         captions: profile.images
           ? profile.images.map((img) => img.caption || "")
           : prevState.captions,
+        gender: profile.gender || prevState.gender, // Added gender
       }));
 
       setImagePreview(profile.image ? `${backendURL}/${profile.image}` : null);
@@ -958,7 +1585,7 @@ export default function Profile() {
 
   useEffect(() => {
     if (!profile) {
-      localStorage.removeItem("formData", JSON.stringify(formData));
+      localStorage.setItem("formData", JSON.stringify(formData));
     }
   }, [formData, profile]);
 
@@ -980,12 +1607,18 @@ export default function Profile() {
   };
 
   const handleDeleteImage = async (index) => {
+    setImageToDelete(index);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteImage = async () => {
+    const index = imageToDelete;
     const token = localStorage.getItem("userToken");
     try {
       const response = await fetch(`${backendURL}/api/family-image/${index}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${token}`, // Ensure you're sending the auth token
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -993,7 +1626,6 @@ export default function Profile() {
         throw new Error("Failed to delete image");
       }
 
-      // If deletion was successful, update local state
       setFormData((prevState) => {
         const newImages = [...prevState.images];
         const newCaptions = [...prevState.captions];
@@ -1008,18 +1640,24 @@ export default function Profile() {
       });
     } catch (error) {
       console.error("Error deleting image:", error);
-      // Handle error (e.g., show an error message to the user)
+      setSnackbar({
+        open: true,
+        message: "Failed to delete image. Please try again.",
+        severity: "error",
+      });
     }
+    setDeleteDialogOpen(false);
   };
+
   const handleFileChange2 = (e) => {
     const files = Array.from(e.target.files);
     const newImagePreviews = files.map((file) => URL.createObjectURL(file));
     setFormData((prevState) => ({
       ...prevState,
-      images: files,
-      captions: new Array(files.length).fill(""),
+      images: [...prevState.images, ...files],
+      captions: [...prevState.captions, ...new Array(files.length).fill("")],
     }));
-    setImagePreviews2(newImagePreviews);
+    setImagePreviews2([...imagePreviews2, ...newImagePreviews]);
   };
 
   const handleCaptionChange = (index, value) => {
@@ -1037,7 +1675,6 @@ export default function Profile() {
       state: value,
       lga: "",
     }));
-    // Update LGA options when state changes
     const selectedState = statesAndLGAs.find((state) => state.name === value);
     setLgaOptions(selectedState ? selectedState.local_governments : []);
   };
@@ -1116,8 +1753,6 @@ export default function Profile() {
         </Box>
 
         <form onSubmit={handleSubmit}>
-          {/* <Grid container spacing={4}> */}
-          {/* ... (keep other form fields) */}
           <Grid container spacing={4}>
             <Grid item xs={12} md={4}>
               <Box display="flex" flexDirection="column" alignItems="center">
@@ -1223,6 +1858,20 @@ export default function Profile() {
                     onChange={handleChange}
                     InputLabelProps={{ shrink: true }}
                   />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Gender</InputLabel>
+                    <Select
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleChange}
+                    >
+                      <MenuItem value="">Select gender</MenuItem>
+                      <MenuItem value="male">Male</MenuItem>
+                      <MenuItem value="female">Female</MenuItem>
+                    </Select>
+                  </FormControl>
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
@@ -1361,6 +2010,8 @@ export default function Profile() {
             </Grid>
           </Grid>
 
+          {/* ... (keep other sections) */}
+
           <Box sx={{ mt: 4 }}>
             <Typography variant="h6" gutterBottom>
               Family Pictures
@@ -1376,39 +2027,45 @@ export default function Profile() {
               variant="contained"
               startIcon={<AddAPhotoIcon />}
               onClick={() => fileInputRef2.current.click()}
+              sx={{ mb: 2 }}
             >
               Add Family Pictures
             </Button>
-            <ImageList sx={{ width: "100%", mt: 2 }} cols={3} rowHeight={200}>
+            <Grid container spacing={2}>
               {imagePreviews2.map((item, index) => (
-                <ImageListItem key={index} sx={{ height: 280 }}>
-                  <img
-                    src={item}
-                    alt={`Family picture ${index + 1}`}
-                    loading="lazy"
-                    style={{ height: 200, objectFit: "cover" }}
-                  />
-                  <Box sx={{ p: 1 }}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      placeholder="Add caption"
-                      value={formData.captions[index] || ""}
-                      onChange={(e) =>
-                        handleCaptionChange(index, e.target.value)
-                      }
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Card>
+                    <CardMedia
+                      component="img"
+                      height="200"
+                      image={item}
+                      alt={`Family picture ${index + 1}`}
+                      sx={{ objectFit: "cover" }}
                     />
-                    <IconButton
-                      sx={{ mt: 1, fontSize: 5 }}
-                      aria-label={`delete image ${index + 1}`}
-                      onClick={() => handleDeleteImage(index)}
-                    >
-                      <DeleteIcon size={12} />
-                    </IconButton>
-                  </Box>
-                </ImageListItem>
+                    <CardContent>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        placeholder="Add caption"
+                        value={formData.captions[index] || ""}
+                        onChange={(e) =>
+                          handleCaptionChange(index, e.target.value)
+                        }
+                        variant="standard"
+                      />
+                    </CardContent>
+                    <CardActions sx={{ justifyContent: "flex-end" }}>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleDeleteImage(index)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </CardActions>
+                  </Card>
+                </Grid>
               ))}
-            </ImageList>
+            </Grid>
           </Box>
 
           <Box sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }}>
@@ -1437,6 +2094,26 @@ export default function Profile() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{"Confirm Delete"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete this image?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={confirmDeleteImage} autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

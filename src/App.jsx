@@ -79,7 +79,7 @@ function App() {
       "/VerifyOtpPage",
       "/ResetPassword",
     ];
-    const protectedRoutes = ["/layout"];
+    const protectedRoutes = ["/layout", "/chatPage"];
 
     // Avoid unnecessary state updates by checking first
     const shouldShowNav = !noNavFooterRoutes.includes(location.pathname);
