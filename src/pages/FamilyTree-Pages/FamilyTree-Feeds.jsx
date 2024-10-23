@@ -117,15 +117,15 @@
 //       .catch(() => setLoading(false));
 //   }, [dispatch]);
 
-//   const handleModalOpen = () => {
-//     console.log("Opening modal...");
-//     setIsModalOpen(true);
-//   };
+// const handleModalOpen = () => {
+//   console.log("Opening modal...");
+//   setIsModalOpen(true);
+// };
 
-//   const handleModalClose = () => {
-//     console.log("Closing modal...");
-//     setIsModalOpen(false);
-//   };
+// const handleModalClose = () => {
+//   console.log("Closing modal...");
+//   setIsModalOpen(false);
+// };
 //   if (loading) {
 //     return <Spinner />;
 //   }
@@ -196,13 +196,13 @@
 //           </div>
 //           <div className="flex mb-2 px-6">
 //             <div className="space-x-3">
-//               <button className="bg-[#d9f8de] text-xs px-5 py-2  rounded-sm transition ease-in-out duration-200 transform hover:scale-105 ">
-//                 <ConnectionButton onClick={handleModalOpen} />
-//               </button>
+// <button className="bg-[#d9f8de] text-xs px-5 py-2  rounded-sm transition ease-in-out duration-200 transform hover:scale-105 ">
+//   <ConnectionButton onClick={handleModalOpen} />
+// </button>
 
-//               <button className="bg-[#d9f8de] text-xs px-5 py-2  rounded-sm transition ease-in-out duration-200 transform hover:scale-105">
-//                 <SendRequestButton />
-//               </button>
+// <button className="bg-[#d9f8de] text-xs px-5 py-2  rounded-sm transition ease-in-out duration-200 transform hover:scale-105">
+//   <SendRequestButton />
+// </button>
 //               <button className="bg-[#d9f8de] text-xs px-5 py-2 rounded-sm   transition ease-in-out duration-200 transform hover:scale-105">
 //                 <StartChatButton
 //                   chat={chat}
@@ -524,9 +524,9 @@
 //         <RecentSearches />
 //         {/* related searches */}
 //       </div>
-//       {isModalOpen && (
-//         <ChatModal isOpen={isModalOpen} onClose={handleModalClose} />
-//       )}
+// {isModalOpen && (
+//   <ChatModal isOpen={isModalOpen} onClose={handleModalClose} />
+// )}
 //     </section>
 //   );
 // }
@@ -545,8 +545,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchStateDetails } from "../../features/Statefeature/stateAction";
 import moment from "moment";
 import { DirectionButton2 } from "../../components/d-button";
+import { IoMdClose } from "react-icons/io";
 import SearchUsers from "../../components/tools/SearchUsers";
 import { RecentSearches } from "../../components/tools/SearchUsers";
+import { Snackbar, Alert } from "@mui/material";
+import { toast } from "react-toastify";
+import { sendConnectionRequest } from "../../features/connectionFeature/connectionAction";
+import { fetchConnections } from "../../features/connectionFeature/connectionAction";
+import { IoIosLink } from "react-icons/io";
+import { IoIosClose } from "react-icons/io";
 
 import {
   Box,
@@ -568,7 +575,15 @@ import {
   useTheme,
   Container,
   CardActionArea,
+  Modal,
+  Pagination,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  ListItemAvatar,
+  TextField,
 } from "@mui/material";
+
 import {
   Message as MessageIcon,
   Home as HomeIcon,
@@ -581,6 +596,8 @@ import {
   Instagram as InstagramIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
+  Close as CloseIcon,
+  Link as LinkIcon,
 } from "@mui/icons-material";
 import FamilyTreeIcon from "@mui/icons-material/AccountTree";
 import ChatIcon from "@mui/icons-material/Chat";
@@ -686,6 +703,18 @@ function FamilyTreeFeeds() {
   const { CreateChat, updateCurrentChat } = useContext(ChatContext);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [Loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleModalOpen = () => {
+    console.log("Opening modal...");
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    console.log("Closing modal...");
+    setIsModalOpen(false);
+  };
 
   const { profile, profiles, loading } = useSelector((state) => state.person);
   const { allStates, religions, tribes } = useSelector((state) => state.state);
@@ -843,14 +872,14 @@ function FamilyTreeFeeds() {
                   variant="outlined"
                   startIcon={<FamilyTreeIcon />}
                   sx={{
-                    borderColor: "#00d121", // Green border color
-                    color: "#00d121", // Green text color to match the border
+                    borderColor: "#00d121",
+                    color: "#00d121",
                     "&:hover": {
-                      borderColor: "#00b81a", // Darker green border on hover
-                      backgroundColor: "rgba(0, 209, 33, 0.1)", // Optional light green background on hover
-                      color: "#00b81a", // Darker green text on hover
+                      borderColor: "#00b81a",
+                      backgroundColor: "rgba(0, 209, 33, 0.1)",
+                      color: "#00b81a",
                     },
-                    mt: { xs: 2, sm: 0 }, // Margin-top adjustment for different screen sizes
+                    mt: { xs: 2, sm: 0 },
                   }}
                 >
                   Go to Tree
@@ -863,14 +892,18 @@ function FamilyTreeFeeds() {
                 src={imageSrc}
                 alt={`${profile?.firstName} ${profile?.lastName}`}
                 sx={{
-                  width: "100%",
+                  width: { xs: "300px", sm: "300px", md: "300px" },
                   height: "auto",
-                  maxWidth: "300px",
+                  maxWidth: "100%",
                   aspectRatio: "1 / 1",
                   marginBottom: 2,
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  border: "2px solid #ddd",
+                  alignSelf: "center",
                   borderRadius: 2,
                 }}
               />
+
               <Typography variant="h5" sx={{ mb: 1 }}>
                 {profile?.lastName} {profile?.firstName} {profile?.middlename}
               </Typography>
@@ -884,6 +917,7 @@ function FamilyTreeFeeds() {
                 }}
               >
                 <Button
+                  onClick={handleStartChat}
                   variant="contained"
                   startIcon={<MessageIcon />}
                   sx={{
@@ -909,9 +943,10 @@ function FamilyTreeFeeds() {
                   }}
                   fullWidth={isMobile}
                 >
-                  Connect
+                  <SendRequestButton />
                 </Button>
                 <Button
+                  onClick={handleModalOpen}
                   variant="contained"
                   startIcon={<GroupIcon />}
                   sx={{
@@ -1154,6 +1189,9 @@ function FamilyTreeFeeds() {
               {/* related searches */}
             </div>
           </Box>
+          {isModalOpen && (
+            <ConnectionModal isOpen={isModalOpen} onClose={handleModalClose} />
+          )}
         </Grid>
       </Grid>
     </Container>
@@ -1174,48 +1212,47 @@ export const ConnectionButton = ({ onClick, chat }) => (
   </button>
 );
 
+// export const SendRequestButton = () => {
+//   const dispatch = useDispatch();
+//   const { user } = useContext(AuthContext);
+//   const { userId } = useParams();
+//   const [isLoading, setIsLoading] = useState(false);
+
+//   const handleClick = async () => {
+//     setIsLoading(true);
+//     try {
+//       await dispatch(
+//         sendConnectionRequest({ senderId: user.id, receiverId: userId })
+//       ).unwrap();
+//       toast.success("Request sent successfully!");
+//     } catch (error) {
+//       toast.error(error || "Failed to send request.");
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   return (
+//     <button
+//       onClick={handleClick}
+//       disabled={isLoading}
+//       className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+//     >
+//       {isLoading ? "Sending..." : "CONNECT"}
+//     </button>
+//   );
+// };
+
 export const SendRequestButton = () => {
   const dispatch = useDispatch();
-  const { user } = useContext(AuthContext);
-  const senderId = user?.id;
+  const { user } = useSelector((state) => state.auth);
   const { userId } = useParams();
-  const receiverId = userId;
+  const [isLoading, setIsLoading] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState("default");
 
-  // Using status instead of loading directly
-  const { status, error, success } = useSelector(
+  const { connections, status } = useSelector(
     (state) => state.connectionRequests
   );
-
-  const isLoading = status === "loading";
-
-  const handleClick = async () => {
-    try {
-      await dispatch(sendConnectionRequest({ senderId, receiverId })).unwrap();
-      toast.success("Request sent successfully!");
-    } catch (error) {
-      // Display a specific error message if available
-      toast.error(error || "Failed to send request.");
-    }
-  };
-
-  return (
-    <button
-      onClick={handleClick}
-      disabled={isLoading}
-      className={` ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-    >
-      {isLoading ? "Sending..." : "Send Request"}
-    </button>
-  );
-};
-
-export function ChatModal({ isOpen, onClose }) {
-  const dispatch = useDispatch();
-  const { connections, status, error } = useSelector(
-    (state) => state.connectionRequests
-  );
-  const { profile, profiles, loading } = useSelector((state) => state.person);
-  const { userId } = useParams();
 
   useEffect(() => {
     if (userId) {
@@ -1223,75 +1260,297 @@ export function ChatModal({ isOpen, onClose }) {
     }
   }, [dispatch, userId]);
 
-  if (status === "loading") {
-    return <div className="text-center py-4">Loading connections...</div>;
-  }
+  useEffect(() => {
+    if (connections.length > 0) {
+      const connection = connections.find(
+        (conn) => conn.userId1._id === userId || conn.userId2._id === userId
+      );
+      if (connection) {
+        setConnectionStatus("connected");
+      } else {
+        const pendingRequest = connections.find(
+          (conn) =>
+            conn.status === "Pending" &&
+            (conn.senderId === user.id || conn.receiverId === user.id)
+        );
+        if (pendingRequest) {
+          setConnectionStatus("pending");
+        } else {
+          setConnectionStatus("default");
+        }
+      }
+    }
+  }, [connections, userId, user.id]);
 
-  if (error) {
-    return <div className="text-center text-red-500 py-4">Error: {error}</div>;
-  }
+  const handleClick = async () => {
+    setIsLoading(true);
+    try {
+      await dispatch(
+        sendConnectionRequest({ senderId: user.id, receiverId: userId })
+      ).unwrap();
+      setConnectionStatus("pending");
+      toast.success("Request sent successfully!");
+    } catch (error) {
+      toast.error(error || "Failed to send request.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getButtonText = () => {
+    if (isLoading) return "Sending...";
+    switch (connectionStatus) {
+      case "pending":
+        return "PENDING";
+      case "connected":
+        return "CONNECTED";
+      default:
+        return "CONNECT";
+    }
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={
+        isLoading ||
+        connectionStatus === "connected" ||
+        connectionStatus === "pending"
+      }
+      className={`${
+        isLoading ||
+        connectionStatus === "connected" ||
+        connectionStatus === "pending"
+          ? "opacity-50 cursor-not-allowed"
+          : ""
+      } `}
+    >
+      {getButtonText()}
+    </button>
+  );
+};
+
+// export function ConnectionModal({ isOpen, onClose }) {
+//   const dispatch = useDispatch();
+//   const { connections, status, error } = useSelector(
+//     (state) => state.connectionRequests
+//   );
+//   const { profile, profiles, loading } = useSelector((state) => state.person);
+//   const { userId } = useParams();
+
+//   useEffect(() => {
+//     if (userId) {
+//       dispatch(fetchConnections(userId));
+//     }
+//   }, [dispatch, userId]);
+
+//   if (status === "loading") {
+//     return <div className="text-center py-4">Loading connections...</div>;
+//   }
+
+//   if (error) {
+//     return <div className="text-center text-red-500 py-4">Error: {error}</div>;
+//   }
+
+//   if (!isOpen) return null;
+
+//   return (
+//     <div className="p-5 fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+//       <div className="bg-white rounded-lg shadow-lg w-full max-w-lg h-[80vh] max-h-[90vh] relative">
+//         <div className="flex justify-between items-center p-4 border-b">
+//           <IoIosLink size={24} />
+
+//           <h2 className="text-sm mb-2 px-6 first-letter:uppercase">
+//             {`${profile.lastName} ${profile.firstName} ${profile.middlename}'s Connections`}
+//           </h2>
+//           <button
+//             className="text-gray-600 hover:text-gray-900"
+//             onClick={onClose}
+//           >
+//             <IoIosClose
+//               className="hover:text-red-400 transition ease-in-out duration-200 transform hover:scale-110"
+//               size={28}
+//             />
+//           </button>
+//         </div>
+
+//         <div className="max-w-2xl mx-auto p-4">
+//           {/* <h2 className="text-xl font-semibold mb-4 ">My Connections</h2> */}
+//           {connections.length === 0 ? (
+//             <p className="text-gray-600">No connections yet.</p>
+//           ) : (
+//             connections.map((connection) => (
+//               <div
+//                 key={connection._id}
+//                 // className="flex items-center p-4 border border-gray-200 shadow-sm rounded-lg mb-2 bg-white"
+//                 className="md:max-w-[30rem] flex items-center justify-between py-2 px-3 border border-gray-200 rounded-lg mb-2 bg-white shadow-sm"
+//               >
+//                 {connection.userId1.image ? (
+//                   <img
+//                     src={`${backendURL}/${connection.userId1.image}`}
+//                     alt={`${connection.userId1.firstName} ${connection.userId1.lastName}`}
+//                     className="w-12 h-12 rounded-full object-cover mr-4"
+//                     onError={(e) => {
+//                       e.target.onerror = null;
+//                       e.target.src = "/fallback-image.png";
+//                     }}
+//                   />
+//                 ) : (
+//                   <FaUserCircle className="w-12 h-12 text-gray-400 mr-4" />
+//                 )}
+
+//                 <div className="flex-1">
+//                   <p className=" first-letter:uppercase ext-lg mod:text-sm font-semibold text-gray-900">
+//                     {`${connection.userId1.firstName} ${connection.userId1.lastName}`}
+//                   </p>
+//                   <p className="text-sm text-gray-500">
+//                     {connection.userId1.email || "No email provided"}
+//                   </p>
+//                 </div>
+//               </div>
+//             ))
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+export function ConnectionModal({ isOpen, onClose }) {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { connections, status, error } = useSelector(
+    (state) => state.connectionRequests
+  );
+  const { profile } = useSelector((state) => state.person);
+  const { userId } = useParams();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [filteredConnections, setFilteredConnections] = useState([]);
+
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    if (userId && isOpen) {
+      dispatch(fetchConnections(userId));
+    }
+  }, [dispatch, userId, isOpen]);
+
+  useEffect(() => {
+    const filtered = connections.filter((connection) =>
+      `${connection.userId1.firstName} ${connection.userId1.lastName}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+    );
+    setFilteredConnections(filtered);
+    setPage(1);
+  }, [connections, searchTerm]);
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handlePageChange = (event, value) => {
+    setPage(value);
+  };
+
+  const handleConnectionClick = (userId) => {
+    navigate(`/FamilyTree-feeds/${userId}`);
+    onClose();
+  };
 
   if (!isOpen) return null;
 
+  const startIndex = (page - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const displayedConnections = filteredConnections.slice(startIndex, endIndex);
+
   return (
-    <div className="p-5 fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-lg h-[80vh] max-h-[90vh] relative">
-        <div className="flex justify-between items-center p-4 border-b">
-          <IoIosLink size={24} />
-
-          <h2 className="text-sm mb-2 px-6 first-letter:uppercase">
-            {`${profile.lastName} ${profile.firstName} ${profile.middlename}'s Connections`}
-          </h2>
-          <button
-            className="text-gray-600 hover:text-gray-900"
-            onClick={onClose}
+    <Dialog open={isOpen} onClose={onClose} maxWidth="sm" fullWidth>
+      <DialogTitle>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <LinkIcon />
+          <Typography
+            variant="h6"
+            sx={{
+              fontSize: { xs: "0.875rem", sm: "1rem", md: "1.25rem" },
+            }}
           >
-            <IoIosClose
-              className="hover:text-red-400 transition ease-in-out duration-200 transform hover:scale-110"
-              size={28}
-            />
-          </button>
-        </div>
+            {`${profile.lastName} ${profile.firstName} ${profile.middlename}'s Connections`}
+          </Typography>
 
-        <div className="max-w-2xl mx-auto p-4">
-          {/* <h2 className="text-xl font-semibold mb-4 ">My Connections</h2> */}
-          {connections.length === 0 ? (
-            <p className="text-gray-600">No connections yet.</p>
-          ) : (
-            connections.map((connection) => (
-              <div
-                key={connection._id}
-                // className="flex items-center p-4 border border-gray-200 shadow-sm rounded-lg mb-2 bg-white"
-                className="md:max-w-[30rem] flex items-center justify-between py-2 px-3 border border-gray-200 rounded-lg mb-2 bg-white shadow-sm"
-              >
-                {connection.userId1.image ? (
-                  <img
-                    src={`${backendURL}/${connection.userId1.image}`}
-                    alt={`${connection.userId1.firstName} ${connection.userId1.lastName}`}
-                    className="w-12 h-12 rounded-full object-cover mr-4"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "/fallback-image.png";
-                    }}
+          <IconButton
+            edge="end"
+            color="inherit"
+            onClick={onClose}
+            aria-label="close"
+          >
+            <CloseIcon />
+          </IconButton>
+        </div>
+      </DialogTitle>
+      <DialogContent>
+        <TextField
+          variant="outlined"
+          placeholder="Search connections..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          margin="normal"
+        />
+        {status === "loading" ? (
+          <CircularProgress />
+        ) : error ? (
+          <Typography color="error">Error: {error}</Typography>
+        ) : filteredConnections.length === 0 ? (
+          <Typography>No connections found.</Typography>
+        ) : (
+          <>
+            <List>
+              {displayedConnections.map((connection) => (
+                <ListItem
+                  key={connection._id}
+                  button
+                  onClick={() => handleConnectionClick(connection.userId1._id)}
+                >
+                  <ListItemAvatar>
+                    <Avatar
+                      src={`${backendURL}/${connection.userId1.image}`}
+                      alt={`${connection.userId1.firstName} ${connection.userId1.lastName}`}
+                    >
+                      {connection.userId1.firstName[0]}
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={`${connection.userId1.firstName} ${connection.userId1.lastName}`}
+                    secondary={
+                      connection.userId1.gender || "Gender not specified"
+                    }
                   />
-                ) : (
-                  <FaUserCircle className="w-12 h-12 text-gray-400 mr-4" />
-                )}
-
-                <div className="flex-1">
-                  <p className=" first-letter:uppercase ext-lg mod:text-sm font-semibold text-gray-900">
-                    {`${connection.userId1.firstName} ${connection.userId1.lastName}`}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {connection.userId1.email || "No email provided"}
-                  </p>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-    </div>
+                </ListItem>
+              ))}
+            </List>
+            <Pagination
+              count={Math.ceil(filteredConnections.length / itemsPerPage)}
+              page={page}
+              onChange={handlePageChange}
+              color="primary"
+              style={{
+                marginTop: "1rem",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            />
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 

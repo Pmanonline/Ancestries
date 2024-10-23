@@ -1,24 +1,65 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
   fetchPendingRequests,
   respondToConnectionRequest,
   fetchConnections,
+  deleteConnection,
 } from "../features/connectionFeature/connectionAction";
-import { toast } from "react-toastify";
-import { FaUserCircle } from "react-icons/fa";
+import {
+  Container,
+  Typography,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Avatar,
+  IconButton,
+  Pagination,
+  Box,
+  CircularProgress,
+  Paper,
+  Grid,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button,
+  Snackbar,
+} from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
+import {
+  PersonAdd as PersonAddIcon,
+  PersonRemove as PersonRemoveIcon,
+  Check as CheckIcon,
+  Close as CloseIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
 
 const backendURL =
   import.meta.env.MODE === "production"
     ? import.meta.env.VITE_BACKEND_URL
     : "http://localhost:8080";
 
-export const PendingRequests = () => {
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
+const PendingRequests = () => {
   const dispatch = useDispatch();
   const userInfo = useSelector((state) => state.auth.user);
-  const { connectionRequests, status, error } = useSelector(
+  const { connectionRequests, status } = useSelector(
     (state) => state.connectionRequests
   );
+  const [page, setPage] = useState(1);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const itemsPerPage = 5;
 
   useEffect(() => {
     if (userInfo?.id) {
@@ -31,67 +72,133 @@ export const PendingRequests = () => {
       await dispatch(
         respondToConnectionRequest({ requestId, response })
       ).unwrap();
-      toast.success(`Request ${response}ed successfully!`);
-      // Fetch updated pending requests and connections
+      setSnackbar({
+        open: true,
+        message: `Request ${response.toLowerCase()}ed successfully!`,
+        severity: "success",
+      });
       dispatch(fetchPendingRequests(userInfo.id));
       dispatch(fetchConnections(userInfo.id));
     } catch (err) {
-      toast.error(err.message || `Failed to ${response} request.`);
+      setSnackbar({
+        open: true,
+        message: err.message || `Failed to ${response.toLowerCase()} request.`,
+        severity: "error",
+      });
     }
   };
 
-  if (status === "loading") {
-    return <div className="text-center py-4">Loading pending requests...</div>;
-  }
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
+  };
 
-  if (error) {
-    return <div className="text-center text-red-500 py-4">Error: {error}</div>;
-  }
+  const paginatedRequests = connectionRequests.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
+  );
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h2 className="text-xl font-semibold mb-4">
+    <Paper elevation={3} sx={{ p: 2, mb: 4 }}>
+      <Typography variant="h7" gutterBottom>
+        <PersonAddIcon
+          sx={{ mr: 1, verticalAlign: "middle", fontWeight: "bold" }}
+        />
         Pending Connection Requests
-      </h2>
-      {connectionRequests.length === 0 ? (
-        <p className="text-gray-600">No pending requests</p>
+      </Typography>
+      {status === "loading" ? (
+        <Box display="flex" justifyContent="center" my={2}>
+          <CircularProgress />
+        </Box>
+      ) : connectionRequests.length === 0 ? (
+        <Typography
+          sx={{ m: 1, verticalAlign: "middle" }}
+          color="textSecondary"
+        >
+          No pending requests
+        </Typography>
       ) : (
-        connectionRequests.map((request) => (
-          <div
-            key={request._id}
-            className="md:max-w-[30rem] flex items-center justify-between py-2 px-3 border border-gray-200 rounded-lg mb-2 bg-white shadow-sm"
-          >
-            <p className=" first-letter:uppercase ext-lg mod:text-sm font-semibold text-gray-900">
-              {`${request?.senderId.firstName} ${request?.senderId.lastName}`}
-            </p>
-            <div className="space-x-2">
-              <button
-                onClick={() => handleResponse(request._id, "Accepted")}
-                className="bg-green-500 text-white bg-blue-500 text-xs rounded-md mx-3 p-1 hover:bg-blue-600   transition ease-in-out duration-200 transform hover:scale-105"
+        <>
+          <List>
+            {paginatedRequests.map((request) => (
+              <ListItem
+                key={request._id}
+                secondaryAction={
+                  <Box>
+                    <IconButton
+                      edge="end"
+                      aria-label="accept"
+                      onClick={() => handleResponse(request._id, "Accepted")}
+                      color="primary"
+                    >
+                      <CheckIcon />
+                    </IconButton>
+                    <IconButton
+                      edge="end"
+                      aria-label="reject"
+                      onClick={() => handleResponse(request._id, "Rejected")}
+                      color="error"
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </Box>
+                }
               >
-                Accept
-              </button>
-              <button
-                onClick={() => handleResponse(request._id, "Rejected")}
-                // className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
-                className="bg-red-500 text-white  text-xs rounded-md mx-3 p-1 hover:bg-red-600   transition ease-in-out duration-200 transform hover:scale-105"
-              >
-                Reject
-              </button>
-            </div>
-          </div>
-        ))
+                <ListItemAvatar>
+                  <Avatar src={`${backendURL}/${request?.senderId.image}`} />
+                </ListItemAvatar>
+                <ListItemText
+                  primary={`${request?.senderId.firstName} ${request?.senderId.lastName}`}
+                  secondary={request?.senderId.email || "No email provided"}
+                />
+              </ListItem>
+            ))}
+          </List>
+          <Box display="flex" justifyContent="center" mt={2}>
+            <Pagination
+              count={Math.ceil(connectionRequests.length / itemsPerPage)}
+              page={page}
+              onChange={(event, value) => setPage(value)}
+              color="primary"
+            />
+          </Box>
+        </>
       )}
-    </div>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Paper>
   );
 };
 
-export const ConnectionsList = () => {
+const ConnectionsList = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const userInfo = useSelector((state) => state.auth.user);
-  const { connections, status, error } = useSelector(
+  const { connections, status } = useSelector(
     (state) => state.connectionRequests
   );
+  const [page, setPage] = useState(1);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [connectionToDelete, setConnectionToDelete] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const itemsPerPage = 10;
 
   useEffect(() => {
     if (userInfo?.id) {
@@ -99,63 +206,163 @@ export const ConnectionsList = () => {
     }
   }, [dispatch, userInfo]);
 
-  if (status === "loading") {
-    return <div className="text-center py-4">Loading connections...</div>;
-  }
+  const handleDeleteConnection = async () => {
+    try {
+      await dispatch(deleteConnection(connectionToDelete)).unwrap();
+      setSnackbar({
+        open: true,
+        message: "Connection removed successfully!",
+        severity: "success",
+      });
+      dispatch(fetchConnections(userInfo.id));
+    } catch (err) {
+      setSnackbar({
+        open: true,
+        message: err.message || "Failed to remove connection.",
+        severity: "error",
+      });
+    }
+    setDeleteDialogOpen(false);
+    setConnectionToDelete(null);
+  };
 
-  if (error) {
-    return <div className="text-center text-red-500 py-4">Error: {error}</div>;
-  }
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const paginatedConnections = Array.isArray(connections)
+    ? connections.slice((page - 1) * itemsPerPage, page * itemsPerPage)
+    : [];
+
+  const handleUserClick = (userId) => {
+    navigate(`/FamilyTree-feeds/${userId}`);
+  };
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <h2 className="text-xl font-semibold mb-4 ">My Connections</h2>
-      {connections.length === 0 ? (
-        <p className="text-gray-600">You have no connections yet.</p>
+    <Paper elevation={3} sx={{ p: 2 }}>
+      <Typography variant="h7" gutterBottom>
+        <PersonRemoveIcon
+          sx={{ mr: 1, verticalAlign: "middle", fontWeight: "bold" }}
+        />
+        My Connections
+      </Typography>
+      {status === "loading" ? (
+        <Box display="flex" justifyContent="center" my={2}>
+          <CircularProgress />
+        </Box>
+      ) : !Array.isArray(connections) || connections.length === 0 ? (
+        <Typography color="textSecondary">
+          You have no connections yet.
+        </Typography>
       ) : (
-        connections.map((connection) => (
-          <div
-            key={connection._id}
-            // className="flex items-center p-4 border border-gray-200 shadow-sm rounded-lg mb-2 bg-white"
-            className="md:max-w-[30rem] flex items-center justify-between py-2 px-3 border border-gray-200 rounded-lg mb-2 bg-white shadow-sm"
-          >
-            {connection.userId1.image ? (
-              <img
-                src={`${backendURL}/${connection.userId1.image}`}
-                alt={`${connection.userId1.firstName} ${connection.userId1.lastName}`}
-                className="w-12 h-12 rounded-full object-cover mr-4"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "/fallback-image.png";
-                }}
-              />
-            ) : (
-              <FaUserCircle className="w-12 h-12 text-gray-400 mr-4" />
-            )}
-
-            <div className="flex-1">
-              <p className=" first-letter:uppercase ext-lg mod:text-sm font-semibold text-gray-900">
-                {`${connection.userId1.firstName} ${connection.userId1.lastName}`}
-              </p>
-              <p className="text-sm text-gray-500">
-                {connection.userId1.email || "No email provided"}
-              </p>
-            </div>
-          </div>
-        ))
+        <>
+          <List>
+            {paginatedConnections.map((connection) => (
+              <ListItem
+                key={connection._id}
+                secondaryAction={
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => {
+                      setConnectionToDelete(connection._id);
+                      setDeleteDialogOpen(true);
+                    }}
+                    sx={{
+                      textTransform: "lowercase", // make text lowercase
+                      fontSize: "0.75rem", // reduce the font size
+                      padding: "4px 8px", // reduce padding for smaller button
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 0, 0, 0.1)", // hover effect with light red background
+                        borderColor: "rgba(255, 0, 0, 0.5)", // change border color on hover
+                      },
+                    }}
+                  >
+                    Delete
+                  </Button>
+                }
+              >
+                <ListItemAvatar>
+                  <Avatar
+                    src={`${backendURL}/${connection.userId1.image}`}
+                    onClick={() => handleUserClick(connection.userId1._id)}
+                    style={{ cursor: "pointer" }}
+                  />
+                </ListItemAvatar>
+                <ListItemText
+                  primary={`${connection.userId1.firstName} ${connection.userId1.lastName}`}
+                  secondary={connection.userId1.email || "No email provided"}
+                  onClick={() => handleUserClick(connection.userId1._id)}
+                  style={{ cursor: "pointer" }}
+                />
+              </ListItem>
+            ))}
+          </List>
+          <Box display="flex" justifyContent="center" mt={2}>
+            <Pagination
+              count={Math.ceil((connections?.length || 0) / itemsPerPage)}
+              page={page}
+              onChange={(event, value) => setPage(value)}
+              color="primary"
+            />
+          </Box>
+        </>
       )}
-    </div>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Confirm Delete Connection"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to remove this connection?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleDeleteConnection} color="error" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Paper>
   );
 };
 
 export function MyConnections() {
   return (
-    <div className="p-6 max-w-3xl ">
-      <h1 className="text-3xl font-bold mb-6 font-Montserrat">Connections</h1>
-      <PendingRequests />
-      <div className="mt-8">
-        <ConnectionsList />
-      </div>
-    </div>
+    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        Connections
+      </Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <PendingRequests />
+        </Grid>
+        <Grid item xs={12}>
+          <ConnectionsList />
+        </Grid>
+      </Grid>
+    </Container>
   );
 }

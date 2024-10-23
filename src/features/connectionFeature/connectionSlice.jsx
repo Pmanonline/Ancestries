@@ -4,6 +4,7 @@ import {
   fetchPendingRequests,
   respondToConnectionRequest,
   fetchConnections,
+  deleteConnection,
 } from "./connectionAction";
 
 const connectionSlice = createSlice({
@@ -12,6 +13,7 @@ const connectionSlice = createSlice({
     connections: [],
     connectionRequests: [],
     status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
+    list: [],
     error: null,
     success: false,
   },
@@ -75,8 +77,21 @@ const connectionSlice = createSlice({
       .addCase(fetchConnections.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.connections = action.payload;
+        state.list = action.payload;
       })
       .addCase(fetchConnections.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
+      })
+      .addCase(deleteConnection.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(deleteConnection.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.connections = action.payload.connections;
+        state.success = true;
+      })
+      .addCase(deleteConnection.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
       });

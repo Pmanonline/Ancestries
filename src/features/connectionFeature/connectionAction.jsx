@@ -91,3 +91,19 @@ export const fetchConnections = createAsyncThunk(
     }
   }
 );
+
+export const deleteConnection = createAsyncThunk(
+  "connections/DeleteConnection",
+  async (connectionId, { rejectWithValue }) => {
+    try {
+      const response = await axios.delete(
+        `${backendURL}/api/deleteConnection/${connectionId}`
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to delete connection"
+      );
+    }
+  }
+);
