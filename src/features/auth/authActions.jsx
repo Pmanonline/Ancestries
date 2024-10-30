@@ -72,7 +72,7 @@ export const registerUser = createAsyncThunk(
       if (response.status === 201) {
         await axios.post(`${backendURL}/api/registerMail`, {
           email,
-          message: "Welcome to our platform!",
+          message: "Welcome to our E_root.ng!",
         });
       }
 
