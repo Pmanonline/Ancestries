@@ -11,11 +11,7 @@ import { RiFilter2Line } from "react-icons/ri";
 import { Box, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import NoResult from "../../assets/images/noResult.png";
 import Search from "../../assets/images/Search.gif";
-
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
+import backendURL from "../../config";
 
 export default function SearchUsers() {
   const [firstName, setFirstName] = useState("");

@@ -21,11 +21,7 @@ import {
   Heart,
   Users,
 } from "lucide-react";
-
-const backendURL =
-  process.env.NODE_ENV !== "production"
-    ? "http://localhost:8080"
-    : "https://your-backend-url";
+import backendURL from "../config";
 
 export function SearchTree() {
   const [firstName, setFirstName] = useState("");

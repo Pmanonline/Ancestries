@@ -1,10 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
+import backendURL from "../../config";
 
 // Define the initial state
 const initialState = {

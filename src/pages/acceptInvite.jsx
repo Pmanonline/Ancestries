@@ -15,10 +15,7 @@ import { DirectionButton2 } from "../components/d-button";
 import Error from "../components/tools/Error";
 import Spinner from "../components/tools/Spinner";
 
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
+import backendURL from "../config";
 
 const AcceptInvite = () => {
   const [firstName, setFirstName] = useState("");

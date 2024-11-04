@@ -2,12 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import Cookies from "js-cookie"; // If needed for handling cookies
 import axiosInstance from "../../components/tools/axiosInstance"; //
-
-// Define your backend URL based on the environment
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
+import backendURL from "../../config";
 
 export const createFamilyMember = createAsyncThunk(
   "form/createFamilyMember",
@@ -170,18 +165,83 @@ export const createFamilyMember = createAsyncThunk(
 //   }
 // );
 
+// export const fetchAllDetails = createAsyncThunk(
+//   "person/fetchAllDetails",
+//   async (userId, { getState, rejectWithValue }) => {
+//     const state = getState().form.fetchDetails;
+//     const THIRTY_MINUTES = 30 * 60 * 1000;
+
+//     // Check if data is still valid
+//     if (state.data && Date.now() - state.lastFetched < THIRTY_MINUTES) {
+//       return state.data; // Return cached data
+//     }
+
+//     const token = localStorage.getItem("userToken");
+//     if (!token) {
+//       return rejectWithValue("No token found");
+//     }
+
+//     try {
+//       const endpoints = [
+//         "GetMother",
+//         "GetPerson",
+//         "GetFather",
+//         "GetPGFather",
+//         "GetPGMother",
+//         "GetMGFather",
+//         "GetMGMother",
+//         "get_MGrtGrandFather",
+//         "get_MGrtGrandMother",
+//         "get_PGrtGrandMother",
+//         "get_PGrtGrandFather",
+//       ];
+
+//       const fetchRequests = endpoints.map((endpoint) =>
+//         axios.get(`${backendURL}/api/${endpoint}/${userId}`, {
+//           headers: { Authorization: `Bearer ${token}` },
+//         })
+//       );
+
+//       const responses = await Promise.allSettled(fetchRequests);
+//       console.log("responses", responses);
+
+//       const result = responses.reduce((acc, response, index) => {
+//         if (response.status === "fulfilled") {
+//           console.log(
+//             `Response from ${endpoints[index]}:`,
+//             response.value.data
+//           );
+//           const key = endpoints[index]
+//             .replace(/^(Get|get_)/, "")
+//             .replace(/^./, (c) => c.toLowerCase());
+//           acc[key] = response.value.data;
+//         } else {
+//           console.error(
+//             `Fetch error for ${endpoints[index]}:`,
+//             response.reason
+//           );
+//           console.error(
+//             `Fetch error for ${endpoints[index]}:`,
+//             response.reason
+//           );
+//         }
+//         return acc;
+//       }, {});
+//       console.log(result);
+
+//       return { ...result, lastFetched: Date.now() };
+//     } catch (error) {
+//       return rejectWithValue(error.message || "An error occurred");
+//     }
+//   }
+// );
+
 export const fetchAllDetails = createAsyncThunk(
   "person/fetchAllDetails",
-  async (userId, { getState, rejectWithValue }) => {
-    const state = getState().form.fetchDetails;
-    const THIRTY_MINUTES = 30 * 60 * 1000;
 
-    // Check if data is still valid
-    if (state.data && Date.now() - state.lastFetched < THIRTY_MINUTES) {
-      return state.data; // Return cached data
-    }
-
+  async (userId, { rejectWithValue }) => {
     const token = localStorage.getItem("userToken");
+
     if (!token) {
       return rejectWithValue("No token found");
     }
@@ -189,15 +249,25 @@ export const fetchAllDetails = createAsyncThunk(
     try {
       const endpoints = [
         "GetMother",
+
         "GetPerson",
+
         "GetFather",
+
         "GetPGFather",
+
         "GetPGMother",
+
         "GetMGFather",
+
         "GetMGMother",
+
         "get_MGrtGrandFather",
+
         "get_MGrtGrandMother",
+
         "get_PGrtGrandMother",
+
         "get_PGrtGrandFather",
       ];
 
@@ -209,23 +279,37 @@ export const fetchAllDetails = createAsyncThunk(
 
       const responses = await Promise.allSettled(fetchRequests);
 
+      console.log("responses", responses);
+
       const result = responses.reduce((acc, response, index) => {
         if (response.status === "fulfilled") {
+          console.log(
+            `Response from ${endpoints[index]}:`,
+
+            response.value.data
+          );
+
           const key = endpoints[index]
+
             .replace(/^(Get|get_)/, "")
+
             .replace(/^./, (c) => c.toLowerCase());
+
           acc[key] = response.value.data;
         } else {
           console.error(
             `Fetch error for ${endpoints[index]}:`,
+
             response.reason
           );
         }
+
         return acc;
       }, {});
+
       console.log(result);
 
-      return { ...result, lastFetched: Date.now() };
+      return result; // Return the fetched data directly
     } catch (error) {
       return rejectWithValue(error.message || "An error occurred");
     }

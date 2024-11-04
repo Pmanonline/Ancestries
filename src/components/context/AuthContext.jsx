@@ -3,13 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../../features/chatFeature/chatActions";
 import { setCredentials } from "../../features/auth/authSlice"; // Import your action for setting credentials
 import axios from "axios";
+import backendURL from "../../config";
 
 export const AuthContext = createContext();
-
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
 
 export const AuthContextProvider = ({ children }) => {
   const dispatch = useDispatch();

@@ -6,11 +6,7 @@ import { ChatContext } from "../context/chatContext";
 import { UnreadNotificationfunction } from "../chats/UnreadNotificationfunction";
 import useFetchLatestMessage from "../Hooks/useFetchLatestMessage";
 import moment from "moment";
-
-const backendURL =
-  process.env.NODE_ENV !== "production"
-    ? "http://localhost:8080"
-    : "https://gekoda-api.onrender.com";
+import backendURL from "../../config";
 
 function UserChats({ chat, user }) {
   const { recipientUser, error } = useFetchRecipientUser(chat, user);

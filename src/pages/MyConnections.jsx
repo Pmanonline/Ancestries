@@ -37,11 +37,7 @@ import {
   Close as CloseIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
-
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
+import backendURL from "../config";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;

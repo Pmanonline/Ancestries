@@ -9,11 +9,7 @@ import { IoMdSend } from "react-icons/io";
 import InputEmoji from "react-input-emoji";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 import backgroundImage from "../../assets/images/backgroundImage.png";
-
-const backendURL =
-  process.env.NODE_ENV !== "production"
-    ? "http://localhost:8080"
-    : "https://gekoda-api.onrender.com";
+import backendURL from "../../config";
 
 function ChatBox({ onReturnToList }) {
   const {

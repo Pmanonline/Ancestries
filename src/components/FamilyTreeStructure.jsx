@@ -726,6 +726,7 @@ import {
   DialogContentText,
   DialogActions,
 } from "@mui/material";
+import backendURL from "../config";
 import { FaEllipsisV } from "react-icons/fa"; // Replacing MoreVertIcon and DeleteIcon
 import { styled } from "@mui/material/styles";
 const LargeAvatar = styled(Avatar)(({ theme }) => ({
@@ -734,10 +735,6 @@ const LargeAvatar = styled(Avatar)(({ theme }) => ({
   margin: "0 auto", // Center the image horizontally
 }));
 
-const backendURL =
-  process.env.NODE_ENV !== "production"
-    ? "http://localhost:8080"
-    : "https://gekoda-api.onrender.com";
 // import { deleteInvite } from "../redux/actions/inviteActions";
 
 Modal.setAppElement("#root");
@@ -746,6 +743,9 @@ export const FamilyTreeStructure = () => {
   const invites = useSelector((state) => state.invite.invites);
   const loading = useSelector((state) => state.invite.loading);
   const error = useSelector((state) => state.invite.error);
+  const { data: allData, lastFetched } = useSelector(
+    (state) => state.form.fetchDetails
+  );
 
   const isActive = (route) => location.pathname === route;
   const { userId } = useParams();
@@ -758,33 +758,17 @@ export const FamilyTreeStructure = () => {
   const startPos = useRef({ x: 0, y: 0 });
 
   console.error(invites, "USERS INVITES");
-
-  const {
-    person: personData,
-    father: fatherData,
-    mother: motherData,
-    MGF: MGFData,
-    MGM: MGMData,
-    PGF: PGFData,
-    PGM: PGMData,
-    PGGF: PGGFData,
-    PGGM: PGGMData,
-    MGGF: MGGFData,
-    MGGM: MGGMData,
-  } = useSelector((state) => state.person);
-
-  // Console log the values
-  console.log("Person Data:", personData);
-  console.log("Father Data:", fatherData);
-  console.log("Mother Data:", motherData);
-  console.log("MGF Data:", MGFData);
-  console.log("MGM Data:", MGMData);
-  console.log("PGF Data:", PGFData);
-  console.log("PGM Data:", PGMData);
-  console.log("PGGF Data:", PGGFData);
-  console.log("PGGM Data:", PGGMData);
-  console.log("MGGF Data:", MGGFData);
-  console.log("MGGM Data:", MGGMData);
+  const PGFData = allData?.pGFather;
+  const PGMData = allData?.pGMother;
+  const MGFData = allData?.mGFather;
+  const MGMData = allData?.mGMother;
+  const PGGMData = allData?.pGrtGrandMother;
+  const MGGFData = allData?.mGrtGrandFather;
+  const MGGMData = allData?.mGrtGrandMother;
+  const personData = allData?.person;
+  const fatherData = allData?.father;
+  const motherData = allData?.mother;
+  const PGGFData = allData?.pGrtGrandFather;
 
   const personCard =
     personData && Object.keys(personData).length > 0

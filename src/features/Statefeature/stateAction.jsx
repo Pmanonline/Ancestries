@@ -1,10 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
+import backendURL from "../../config";
 
 // Helper function to check if data is stale
 const isDataStale = (lastFetchTime) => {
@@ -84,3 +80,72 @@ export const fetchStateDetails = createAsyncThunk(
     }
   }
 );
+
+// import { createAsyncThunk } from "@reduxjs/toolkit";
+// import axios from "axios";
+
+// const backendURL =
+//   import.meta.env.MODE === "production"
+//     ? import.meta.env.VITE_BACKEND_URL
+//     : "http://localhost:8080";
+
+// // Helper function to check if data is stale
+// const isDataStale = (lastFetchTime) => {
+//   const staleDuration = 5 * 60 * 1000; // 5 minutes
+//   return !lastFetchTime || Date.now() - lastFetchTime > staleDuration;
+// };
+
+// export const fetchStateDetails = createAsyncThunk(
+//   "state/fetchStateDetails",
+//   async (stateName, { getState, rejectWithValue }) => {
+//     const state = getState().state;
+
+//     // Check if we have data and it's not stale
+//     if (
+//       state.allStates.length > 0 &&
+//       state.religions &&
+//       state.tribes &&
+//       !isDataStale(state.lastFetchTime)
+//     ) {
+//       // If we have a specific state and it matches the requested one, return early
+//       if (
+//         stateName &&
+//         state.specificState &&
+//         state.specificState.name === stateName
+//       ) {
+//         return {
+//           allStates: state.allStates,
+//           specificState: state.specificState,
+//           religions: state.religions,
+//           tribes: state.tribes,
+//         };
+//       }
+//     }
+
+//     try {
+//       // Use Promise.all to fetch all required data
+//       const [allStatesResponse, specificStateResponse, religionsResponse] =
+//         await Promise.all([
+//           axios.get(`${backendURL}/api/states`),
+//           stateName
+//             ? axios.get(`${backendURL}/api/states/${stateName}`)
+//             : Promise.resolve({ data: null }), // Resolve to null if no stateName
+//           axios.get(`${backendURL}/api/getReligion`),
+//         ]);
+
+//       // Extract data from responses
+//       const result = {
+//         allStates: allStatesResponse.data,
+//         specificState: specificStateResponse.data,
+//         religions: religionsResponse.data.religions,
+//         tribes: religionsResponse.data.tribes,
+//         lastFetchTime: Date.now(),
+//       };
+
+//       return result;
+//     } catch (error) {
+//       console.error("Error fetching state details:", error);
+//       return rejectWithValue(error.message || "An error occurred");
+//     }
+//   }
+// );

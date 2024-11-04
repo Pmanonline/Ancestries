@@ -1,10 +1,6 @@
 import axios from "axios";
 import { isTokenExpired } from "./utils";
-
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
+import backendURL from "../../config";
 
 // Function to refresh the token
 const refreshAuthToken = async () => {

@@ -6,11 +6,7 @@ import { CgProfile } from "react-icons/cg";
 import LayoutNAv from "../../../components/layoutNAv";
 import { fetchVisits } from "../../../features/UserFeature/inviteAction";
 import moment from "moment";
-
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
+import backendURL from "../../../config";
 
 const Viewers = () => {
   const dispatch = useDispatch();

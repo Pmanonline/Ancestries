@@ -25,11 +25,7 @@ import {
 } from "../../features/UserFeature/UserAction";
 import PaternalGGFform from "../../components/Forms/paternalGGFform";
 import { invalidateCache } from "../../features/UserFeature/UserSlice";
-
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
+import backendURL from "../../config";
 
 const style = {
   position: "absolute",

@@ -1,15 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
-// Define the base URL
-const baseUrl =
-  process.env.NODE_ENV !== "production"
-    ? "http://127.0.0.1:8080/" // Fallback to localhost during development
-    : import.meta.env.VITE_BACKEND_URL; // Use the environment variable in production
+import backendURL from "../../config";
 
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    baseUrl,
+    backendURL,
     prepareHeaders: (headers, { getState }) => {
       // Retrieve the token from the state
       const token = getState().auth.userToken;

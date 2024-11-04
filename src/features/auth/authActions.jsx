@@ -2,20 +2,10 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { SET_EMAIL } from "../types";
 import Cookies from "js-cookie";
+import backendURL from "../../config";
 
 import * as jwt_decode from "jwt-decode";
-// import jwt_decode from "jwt-decode";
 
-axios.defaults.withCredentials = true;
-
-// Define your backend URL based on the environment
-
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
-
-// Set up Axios to include credentials
 axios.defaults.withCredentials = true;
 
 // Action to set email

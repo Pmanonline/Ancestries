@@ -1,11 +1,7 @@
 // src/redux/inviteSlice.js
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
-
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
+import backendURL from "../../config";
 
 export const sendInvite = createAsyncThunk(
   "invite/sendInvite",

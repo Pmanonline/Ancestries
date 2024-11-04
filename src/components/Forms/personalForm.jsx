@@ -20,10 +20,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { MdOutlineAddAPhoto } from "react-icons/md";
 import { Popup, RelativePopup, IllustrationPopup } from "../tools/popUp";
-const backendURL =
-  process.env.NODE_ENV !== "production"
-    ? "http://localhost:8080"
-    : "https://gekoda-api.onrender.com";
+import backendURL from "../../config";
 
 const PersonalForm = ({ initialState = {}, isEdit = false }) => {
   const [showPopup, setShowPopup] = useState(true);

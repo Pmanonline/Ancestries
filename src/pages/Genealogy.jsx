@@ -568,10 +568,548 @@
 
 // export default Genealogy;
 
+// import React, { useEffect, useState, useCallback, useMemo } from "react";
+// import { useParams, useNavigate } from "react-router-dom";
+// import { useDispatch, useSelector } from "react-redux";
+// import { fetchStateDetails } from "../features/Statefeature/stateAction";
+// import {
+//   Container,
+//   Typography,
+//   TextField,
+//   Button,
+//   Select,
+//   MenuItem,
+//   FormControl,
+//   InputLabel,
+//   Grid,
+//   Paper,
+//   List,
+//   ListItem,
+//   ListItemText,
+//   Card,
+//   CardContent,
+//   Box,
+//   CircularProgress,
+// } from "@mui/material";
+// import SearchIcon from "@mui/icons-material/Search";
+// import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+
+// const backendURL =
+//   import.meta.env.MODE === "production"
+//     ? import.meta.env.VITE_BACKEND_URL
+//     : "http://localhost:8080";
+
+// function Genealogy() {
+//   const { stateName } = useParams();
+//   const navigate = useNavigate();
+//   const dispatch = useDispatch();
+//   const { allStates, specificState, religions, loading, error } = useSelector(
+//     (state) => state.state
+//   );
+
+//   const [selectedState, setSelectedState] = useState(stateName || "");
+//   const [selectedLocalGovernment, setSelectedLocalGovernment] = useState(null);
+//   const [searchTerm, setSearchTerm] = useState("");
+
+//   const filteredStates = useMemo(() => {
+//     if (!searchTerm) return allStates;
+//     return allStates.filter((state) =>
+//       state.name.toLowerCase().includes(searchTerm.toLowerCase())
+//     );
+//   }, [searchTerm, allStates]);
+
+//   const handleSelectChange = useCallback(
+//     (event) => {
+//       const selectedName = event.target.value;
+//       const selectedArea = specificState.localGovernments.find(
+//         (area) => area.name === selectedName
+//       );
+//       setSelectedLocalGovernment(selectedArea);
+//     },
+//     [specificState]
+//   );
+
+//   const handleChange = useCallback((event) => {
+//     setSelectedState(event.target.value);
+//   }, []);
+
+//   const handleSearch = useCallback(() => {
+//     const stateFound = filteredStates[0];
+//     if (stateFound) {
+//       setSelectedState(stateFound.name);
+//       setSearchTerm("");
+//     } else {
+//       alert("State not found");
+//     }
+//   }, [filteredStates]);
+
+//   const handleScroll = useCallback(() => {
+//     const element = document.getElementById("localGovernment");
+//     if (element) {
+//       element.scrollIntoView({ behavior: "smooth" });
+//     }
+//   }, []);
+
+//   useEffect(() => {
+//     dispatch(fetchStateDetails());
+//   }, [dispatch]);
+
+//   useEffect(() => {
+//     if (selectedState) {
+//       dispatch(fetchStateDetails(selectedState));
+//     }
+//   }, [dispatch, selectedState]);
+
+//   useEffect(() => {
+//     if (stateName !== selectedState) {
+//       setSelectedState(stateName || "");
+//     }
+//   }, [stateName]);
+
+//   useEffect(() => {
+//     if (selectedState) {
+//       navigate(
+//         `/genealogy/${encodeURIComponent(selectedState.replace(/ /g, "-"))}`
+//       );
+//     }
+//   }, [selectedState, navigate]);
+
+//   useEffect(() => {
+//     if (!stateName) {
+//       navigate(`/genealogy/Abia State`);
+//     }
+//   }, [stateName, navigate]);
+
+//   useEffect(() => {
+//     if (specificState?.localGovernments?.length > 0) {
+//       setSelectedLocalGovernment(specificState.localGovernments[0]);
+//     }
+//   }, [specificState?.localGovernments]);
+
+//   if (loading)
+//     return (
+//       <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-100 z-50">
+//         <CircularProgress size={40} className="text-btColour" />
+//       </div>
+//     );
+//   if (error) return <Typography color="error">Error: {error}</Typography>;
+//   if (!specificState)
+//     return <Typography>No details available for {selectedState}</Typography>;
+
+//   return (
+//     <Container maxWidth="lg">
+//       <Box mb={4}>
+//         <Grid container spacing={2} alignItems="center">
+//           <Grid item xs={12} sm={8}>
+//             <TextField
+//               fullWidth
+//               variant="outlined"
+//               value={searchTerm}
+//               onChange={(e) => setSearchTerm(e.target.value)}
+//               placeholder="Search for a state"
+//             />
+//           </Grid>
+//           <Grid item xs={12} sm={4}>
+//             <Button
+//               fullWidth
+//               variant="contained"
+//               color="primary"
+//               onClick={handleSearch}
+//               startIcon={<SearchIcon />}
+//             >
+//               Search
+//             </Button>
+//           </Grid>
+//         </Grid>
+//       </Box>
+
+//       <FormControl fullWidth variant="outlined" margin="normal">
+//         <InputLabel>Select a state</InputLabel>
+//         <Select
+//           value={selectedState}
+//           onChange={handleChange}
+//           label="Select a state"
+//         >
+//           <MenuItem value="" disabled>
+//             Select a state...
+//           </MenuItem>
+//           {allStates && allStates.length > 0 ? (
+//             allStates.map((state) => (
+//               <MenuItem key={state.name} value={state.name}>
+//                 {state.name}
+//               </MenuItem>
+//             ))
+//           ) : (
+//             <MenuItem value="">No states available</MenuItem>
+//           )}
+//         </Select>
+//       </FormControl>
+
+//       <Paper elevation={3} sx={{ p: 3, my: 4 }}>
+//         <Grid container spacing={4}>
+//           <Grid item xs={12} md={8}>
+//             <Typography variant="body1" gutterBottom>
+//               <strong>Language:</strong> {specificState.language}
+//             </Typography>
+//             <Typography variant="body1" gutterBottom>
+//               <strong>Location:</strong> {specificState.location}
+//             </Typography>
+//             <Typography variant="body1" gutterBottom>
+//               <strong>Tribe:</strong> {specificState.tribe}
+//             </Typography>
+//             <Button color="primary" onClick={handleScroll}>
+//               Learn more about local governments and cities in{" "}
+//               {specificState.name}
+//             </Button>
+
+//             <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>
+//               Origin of {specificState.name}
+//             </Typography>
+//             <Typography
+//               variant="body1"
+//               dangerouslySetInnerHTML={{ __html: specificState?.origin }}
+//             />
+//           </Grid>
+//           <Grid item xs={12} md={4}>
+//             <Box
+//               component="img"
+//               src={`${backendURL}/insertImage/${specificState?.image}`}
+//               alt={specificState?.name}
+//               sx={{ width: "100%", borderRadius: 1 }}
+//             />
+//           </Grid>
+//         </Grid>
+//       </Paper>
+
+//       <Typography variant="h6" gutterBottom>
+//         History of {specificState.name}
+//       </Typography>
+//       {Array.isArray(specificState.history) &&
+//       specificState.history.length > 0 ? (
+//         specificState.history.map((history, index) => (
+//           <Paper key={index} elevation={2} sx={{ p: 3, mb: 3 }}>
+//             <Typography
+//               variant="body1"
+//               dangerouslySetInnerHTML={{ __html: history?.writeUp }}
+//               gutterBottom
+//             />
+//             {Array.isArray(history.list) && (
+//               <List>
+//                 {history.list.map((item, idx) => (
+//                   <ListItem key={idx}>
+//                     <ListItemText
+//                       primary={
+//                         <span dangerouslySetInnerHTML={{ __html: item }} />
+//                       }
+//                     />
+//                   </ListItem>
+//                 ))}
+//               </List>
+//             )}
+//           </Paper>
+//         ))
+//       ) : (
+//         <Typography variant="body1">
+//           No History information available.
+//         </Typography>
+//       )}
+
+//       <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>
+//         Culture of {specificState.name}
+//       </Typography>
+//       {Array.isArray(specificState.cultures) &&
+//       specificState.cultures.length > 0 ? (
+//         specificState.cultures.map((culture, index) => (
+//           <Paper key={index} elevation={2} sx={{ p: 3, mb: 3 }}>
+//             <Typography
+//               variant="body1"
+//               dangerouslySetInnerHTML={{ __html: culture?.writeUp }}
+//               gutterBottom
+//             />
+//             {Array.isArray(culture.list) && (
+//               <List>
+//                 {culture.list.map((item, idx) => (
+//                   <ListItem key={idx}>
+//                     <ListItemText
+//                       primary={
+//                         <span dangerouslySetInnerHTML={{ __html: item }} />
+//                       }
+//                     />
+//                   </ListItem>
+//                 ))}
+//               </List>
+//             )}
+//           </Paper>
+//         ))
+//       ) : (
+//         <Typography variant="body1">
+//           No cultural information available.
+//         </Typography>
+//       )}
+
+//       <Box sx={{ height: 200, bgcolor: "grey.300", my: 3 }} />
+
+//       <Typography variant="h6" gutterBottom>
+//         Kingship in {specificState.name}
+//       </Typography>
+//       {Array.isArray(specificState.kingship) &&
+//       specificState.kingship.length > 0 ? (
+//         specificState.kingship.map((kingship, index) => (
+//           <Paper key={index} elevation={2} sx={{ p: 3, mb: 3 }}>
+//             <Typography
+//               variant="body1"
+//               dangerouslySetInnerHTML={{ __html: kingship?.writeUp }}
+//               gutterBottom
+//             />
+//             {Array.isArray(kingship.list) && (
+//               <List>
+//                 {kingship.list.map((item, idx) => (
+//                   <ListItem key={idx}>
+//                     <ListItemText
+//                       primary={
+//                         <span dangerouslySetInnerHTML={{ __html: item }} />
+//                       }
+//                     />
+//                   </ListItem>
+//                 ))}
+//               </List>
+//             )}
+//           </Paper>
+//         ))
+//       ) : (
+//         <Typography variant="body1">
+//           No kingship information available.
+//         </Typography>
+//       )}
+
+//       <Box sx={{ height: 200, bgcolor: "grey.300", my: 3 }} />
+
+//       <Typography variant="h6" gutterBottom>
+//         Indigenous foods in {specificState.name}
+//       </Typography>
+//       {Array.isArray(specificState.foods) && specificState.foods.length > 0 ? (
+//         specificState.foods.map((food, index) => (
+//           <Paper key={index} elevation={2} sx={{ p: 3, mb: 3 }}>
+//             <Typography variant="body1" gutterBottom>
+//               {food.writeUp}
+//             </Typography>
+//             {Array.isArray(food.list) && (
+//               <List>
+//                 {food.list.map((item, idx) => (
+//                   <ListItem key={idx}>
+//                     <ListItemText
+//                       primary={
+//                         <span dangerouslySetInnerHTML={{ __html: item }} />
+//                       }
+//                     />
+//                   </ListItem>
+//                 ))}
+//               </List>
+//             )}
+//           </Paper>
+//         ))
+//       ) : (
+//         <Typography variant="body1">No food information available.</Typography>
+//       )}
+
+//       <Grid container spacing={4} id="localGovernment">
+//         <Grid item xs={12} md={4}>
+//           <Typography variant="h6" gutterBottom>
+//             Local government / cities in {specificState.name}
+//           </Typography>
+//           <List>
+//             {specificState.localGovernmentsList.map((area, index) => (
+//               <ListItem key={index}>
+//                 <ListItemText primary={area} />
+//               </ListItem>
+//             ))}
+//           </List>
+//         </Grid>
+//         <Grid item xs={12} md={8}>
+//           <Box
+//             component="img"
+//             src={`${backendURL}/insertImage/${specificState?.image}`}
+//             alt={specificState?.name}
+//             sx={{ width: "100%", borderRadius: 1 }}
+//           />
+//         </Grid>
+//       </Grid>
+
+//       <Box my={4}>
+//         <FormControl fullWidth variant="outlined">
+//           <InputLabel>Select Local Government</InputLabel>
+//           <Select
+//             value={selectedLocalGovernment ? selectedLocalGovernment.name : ""}
+//             onChange={handleSelectChange}
+//             label="Select Local Government"
+//           >
+//             {Array.isArray(specificState.localGovernments) &&
+//               specificState.localGovernments.map((area) => (
+//                 <MenuItem key={area._id} value={area.name}>
+//                   {area.name}
+//                 </MenuItem>
+//               ))}
+//           </Select>
+//         </FormControl>
+//       </Box>
+
+//       {selectedLocalGovernment && (
+//         <Card elevation={3}>
+//           <CardContent>
+//             <Typography variant="h5" gutterBottom>
+//               {selectedLocalGovernment.name}
+//             </Typography>
+
+//             {Array.isArray(selectedLocalGovernment?.origin) &&
+//               selectedLocalGovernment.origin.length > 0 && (
+//                 <>
+//                   <Typography variant="h6" gutterBottom>
+//                     Origin of {selectedLocalGovernment.name}
+//                   </Typography>
+//                   {selectedLocalGovernment.origin.map((origin, index) => (
+//                     <Box key={index} mb={3}>
+//                       <Typography
+//                         variant="body1"
+//                         dangerouslySetInnerHTML={{ __html: origin?.writeUp }}
+//                         gutterBottom
+//                       />
+//                       {Array.isArray(origin.list) && origin.list.length > 0 && (
+//                         <List>
+//                           {origin.list.map((item, idx) => (
+//                             <ListItem key={idx}>
+//                               <ListItemText
+//                                 primary={
+//                                   <span
+//                                     dangerouslySetInnerHTML={{ __html: item }}
+//                                   />
+//                                 }
+//                               />
+//                             </ListItem>
+//                           ))}
+//                         </List>
+//                       )}
+//                     </Box>
+//                   ))}
+//                 </>
+//               )}
+
+//             {Array.isArray(selectedLocalGovernment?.history) &&
+//               selectedLocalGovernment.history.length > 0 && (
+//                 <>
+//                   <Typography variant="h6" gutterBottom>
+//                     History of {selectedLocalGovernment.name}
+//                   </Typography>
+//                   {selectedLocalGovernment.history.map((history, index) => (
+//                     <Box key={index} mb={3}>
+//                       <Typography
+//                         variant="body1"
+//                         dangerouslySetInnerHTML={{ __html: history?.writeUp }}
+//                         gutterBottom
+//                       />
+//                       {Array.isArray(history.list) &&
+//                         history.list.length > 0 && (
+//                           <List>
+//                             {history.list.map((item, idx) => (
+//                               <ListItem key={idx}>
+//                                 <ListItemText
+//                                   primary={
+//                                     <span
+//                                       dangerouslySetInnerHTML={{ __html: item }}
+//                                     />
+//                                   }
+//                                 />
+//                               </ListItem>
+//                             ))}
+//                           </List>
+//                         )}
+//                     </Box>
+//                   ))}
+//                 </>
+//               )}
+
+//             {Array.isArray(selectedLocalGovernment?.cultureTradition) &&
+//               selectedLocalGovernment.cultureTradition.length > 0 && (
+//                 <>
+//                   <Typography variant="h6" gutterBottom>
+//                     Cultures and Tradition of {selectedLocalGovernment.name}
+//                   </Typography>
+//                   {selectedLocalGovernment.cultureTradition.map(
+//                     (culture, index) => (
+//                       <Box key={index} mb={3}>
+//                         <Typography
+//                           variant="body1"
+//                           dangerouslySetInnerHTML={{ __html: culture?.writeUp }}
+//                           gutterBottom
+//                         />
+//                         {Array.isArray(culture.list) &&
+//                           culture.list.length > 0 && (
+//                             <List>
+//                               {culture.list.map((item, idx) => (
+//                                 <ListItem key={idx}>
+//                                   <ListItemText
+//                                     primary={
+//                                       <span
+//                                         dangerouslySetInnerHTML={{
+//                                           __html: item,
+//                                         }}
+//                                       />
+//                                     }
+//                                   />
+//                                 </ListItem>
+//                               ))}
+//                             </List>
+//                           )}
+//                       </Box>
+//                     )
+//                   )}
+//                 </>
+//               )}
+
+//             {Array.isArray(selectedLocalGovernment?.kingship) &&
+//               selectedLocalGovernment.kingship.length > 0 && (
+//                 <>
+//                   <Typography variant="h6" gutterBottom>
+//                     Kingship in {selectedLocalGovernment.name}
+//                   </Typography>
+//                   {selectedLocalGovernment.kingship.map((kingship, index) => (
+//                     <Box key={index} mb={3}>
+//                       <Typography
+//                         variant="body1"
+//                         dangerouslySetInnerHTML={{ __html: kingship.writeUp }}
+//                         gutterBottom
+//                       />
+//                       {Array.isArray(kingship.list) &&
+//                         kingship.list.length > 0 && (
+//                           <List>
+//                             {kingship.list.map((item, idx) => (
+//                               <ListItem key={idx}>
+//                                 <ListItemText
+//                                   primary={
+//                                     <span
+//                                       dangerouslySetInnerHTML={{ __html: item }}
+//                                     />
+//                                   }
+//                                 />
+//                               </ListItem>
+//                             ))}
+//                           </List>
+//                         )}
+//                     </Box>
+//                   ))}
+//                 </>
+//               )}
+//           </CardContent>
+//         </Card>
+//       )}
+//     </Container>
+//   );
+// }
+
+// export default Genealogy;
+
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchStateDetails } from "../features/Statefeature/stateAction";
+import axios from "axios";
 import {
   Container,
   Typography,
@@ -592,24 +1130,53 @@ import {
   CircularProgress,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
+import { ClipLoader } from "react-spinners";
+import backendURL from "../config";
+import { DirectionButton2 } from "../components/d-button";
+import { Dropdown } from "flowbite-react";
 
 function Genealogy() {
   const { stateName } = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { allStates, specificState, religions, loading, error } = useSelector(
-    (state) => state.state
-  );
 
+  const [allStates, setAllStates] = useState([]);
+  const [specificState, setSpecificState] = useState(null);
+  const [religions, setReligions] = useState(null);
+  const [tribes, setTribes] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedState, setSelectedState] = useState(stateName || "");
   const [selectedLocalGovernment, setSelectedLocalGovernment] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Fetch state details
+  const fetchStateDetails = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [allStatesResponse, religionsResponse, specificStateResponse] =
+        await Promise.all([
+          axios.get(`${backendURL}/api/states`),
+          axios.get(`${backendURL}/api/getReligion`),
+          selectedState
+            ? axios.get(`${backendURL}/api/states/${selectedState}`)
+            : Promise.resolve({ data: null }),
+        ]);
+
+      setAllStates(allStatesResponse.data);
+      setReligions(religionsResponse.data.religions);
+      setTribes(religionsResponse.data.tribes);
+      setSpecificState(specificStateResponse.data);
+    } catch (err) {
+      setError(err.message || "An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedState]);
+
+  useEffect(() => {
+    fetchStateDetails();
+  }, [fetchStateDetails]);
 
   const filteredStates = useMemo(() => {
     if (!searchTerm) return allStates;
@@ -643,102 +1210,92 @@ function Genealogy() {
     }
   }, [filteredStates]);
 
-  const handleScroll = useCallback(() => {
-    const element = document.getElementById("localGovernment");
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  }, []);
-
-  useEffect(() => {
-    dispatch(fetchStateDetails());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (selectedState) {
-      dispatch(fetchStateDetails(selectedState));
-    }
-  }, [dispatch, selectedState]);
-
-  useEffect(() => {
-    if (stateName !== selectedState) {
-      setSelectedState(stateName || "");
-    }
-  }, [stateName]);
-
-  useEffect(() => {
-    if (selectedState) {
-      navigate(
-        `/genealogy/${encodeURIComponent(selectedState.replace(/ /g, "-"))}`
-      );
-    }
-  }, [selectedState, navigate]);
-
-  useEffect(() => {
-    if (!stateName) {
-      navigate(`/genealogy/Abia State`);
-    }
-  }, [stateName, navigate]);
-
   useEffect(() => {
     if (specificState?.localGovernments?.length > 0) {
       setSelectedLocalGovernment(specificState.localGovernments[0]);
     }
   }, [specificState?.localGovernments]);
 
-  if (loading) return <CircularProgress />;
-  if (error) return <Typography color="error">Error: {error}</Typography>;
-  if (!specificState)
+  if (loading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-100 z-50">
+        <ClipLoader color="#36D7B7" loading={true} size={100} />;
+      </div>
+    );
+  }
+
+  if (error) {
+    return <Typography color="error">Error: {error}</Typography>;
+  }
+
+  if (!specificState) {
     return <Typography>No details available for {selectedState}</Typography>;
+  }
 
   return (
     <Container maxWidth="lg">
-      <Box mb={4}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={8}>
-            <TextField
-              fullWidth
-              variant="outlined"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search for a state"
-            />
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              onClick={handleSearch}
-              startIcon={<SearchIcon />}
-            >
-              Search
-            </Button>
-          </Grid>
-        </Grid>
-      </Box>
+      <form
+        onSubmit={handleSearch}
+        className="flex flex-col sm:flex-row items-center w-full sm:w-auto"
+      >
+        <input
+          type="text"
+          placeholder="Customize your search more"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="px-6 py-2 mb-4 sm:mb-0 sm:mr-4 w-full sm:w-[26rem] focus:outline-none focus:ring-2 focus:ring-green text-black bg-NavClr rounded-xl rounded-bl-xl"
+        />
 
-      <FormControl fullWidth variant="outlined" margin="normal">
-        <InputLabel>Select a state</InputLabel>
-        <Select
-          value={selectedState}
-          onChange={handleChange}
-          label="Select a state"
+        <button
+          className="text-white flex items-center justify-center bg-green-500 px-4 py-2 bg-green hover:bg-green-600 rounded-xl rounded-br-xl sm:w-auto"
+          type="submit"
         >
-          <MenuItem value="" disabled>
-            Select a state...
-          </MenuItem>
-          {allStates && allStates.length > 0 ? (
-            allStates.map((state) => (
-              <MenuItem key={state.name} value={state.name}>
-                {state.name}
-              </MenuItem>
-            ))
-          ) : (
-            <MenuItem value="">No states available</MenuItem>
-          )}
-        </Select>
-      </FormControl>
+          <span className="mr-2">Search</span>
+
+          <DirectionButton2 className="ml-2" />
+        </button>
+      </form>
+
+      <span className="w-[50%]">
+        <FormControl variant="outlined" margin="normal" sx={{ width: "50%" }}>
+          <InputLabel>Select a state</InputLabel>
+          <Select
+            value={selectedState}
+            onChange={handleChange}
+            label="Select a state"
+            inputProps={{
+              sx: {
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#00D121", // Set border color to green
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#00D121", // Set border color on hover to green
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#00D121", // Set border color when focused to green
+                },
+                // Additional styles for the input
+                "&.Mui-focused": {
+                  backgroundColor: "white", // Optional: set background color when focused
+                },
+              },
+            }}
+          >
+            <MenuItem value="" disabled>
+              Select a state...
+            </MenuItem>
+            {allStates && allStates.length > 0 ? (
+              allStates.map((state) => (
+                <MenuItem key={state.name} value={state.name}>
+                  {state.name}
+                </MenuItem>
+              ))
+            ) : (
+              <MenuItem value="">No states available</MenuItem>
+            )}
+          </Select>
+        </FormControl>
+      </span>
 
       <Paper elevation={3} sx={{ p: 3, my: 4 }}>
         <Grid container spacing={4}>
@@ -752,7 +1309,10 @@ function Genealogy() {
             <Typography variant="body1" gutterBottom>
               <strong>Tribe:</strong> {specificState.tribe}
             </Typography>
-            <Button color="primary" onClick={handleScroll}>
+            <Button
+              color="primary"
+              onClick={() => navigate(`/genealogy/${selectedState}`)}
+            >
               Learn more about local governments and cities in{" "}
               {specificState.name}
             </Button>

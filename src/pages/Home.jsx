@@ -283,7 +283,7 @@ function Home() {
                 Explore your ethnicity
               </button>
             </Link>
-            <Link to={"/names/ayo"}>
+            <Link to={"/name-meanings"}>
               <button className="bg-purple text-white py-2 px-3 rounded-2xl font-bold mod:text-sm transition ease-in-out duration-200 transform hover:scale-105">
                 know more through surname
               </button>

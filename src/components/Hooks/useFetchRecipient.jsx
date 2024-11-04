@@ -1,11 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { getRequest } from "../../features/chatFeature/chatActions";
 import { AuthContext } from "../../components/context/AuthContext";
-
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
+import backendURL from "../../config";
 
 function useFetchRecipientUser(chat) {
   const [recipientUser, setRecipientUser] = useState(null);

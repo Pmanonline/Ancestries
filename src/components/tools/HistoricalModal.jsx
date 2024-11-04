@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import { IoMdClose } from "react-icons/io";
 import "../../../src/App.css";
-
+import backendURL from "../../config";
 const HistoricalModal = ({ open, onClose, person }) => {
   const modalRef = useRef(null);
 
@@ -23,11 +23,6 @@ const HistoricalModal = ({ open, onClose, person }) => {
   }, [open, onClose]);
 
   if (!open) return null; // Return null if modal is not open
-
-  const backendURL =
-    import.meta.env.MODE === "production"
-      ? import.meta.env.VITE_BACKEND_URL
-      : "http://localhost:8080";
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 mod:mx-3 px-3 ">

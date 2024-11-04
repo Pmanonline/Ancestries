@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { AuthContext } from "../components/context/AuthContext";
 import { ChatContext } from "../components/context/chatContext";
 import UserChats from "../components/chats/userChats";
@@ -47,14 +48,6 @@ const ChatPage = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, [fetchChats]);
 
-  if (isUserChatsLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        Loading chats...
-      </div>
-    );
-  }
-
   if (isUserChatsError) {
     return (
       <div className="flex justify-center items-center h-screen text-red-500">
@@ -87,10 +80,12 @@ const ChatPage = () => {
             <AiOutlineMessage className="mr-2 text-gray-600" size={24} />
             <h2 className="text-lg font-bold text-gray-800">My Chats</h2>
           </span>
-          <AiOutlineHome
-            className="text-green-500 hover:text-gray-800"
-            size={24}
-          />
+          <Link to={"/"}>
+            <AiOutlineHome
+              className="text-green-500 hover:text-gray-800 md:hidden"
+              size={24}
+            />
+          </Link>
         </div>
 
         <div className="overflow-y-auto h-[calc(100%-4rem)]">

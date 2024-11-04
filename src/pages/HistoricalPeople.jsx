@@ -5,13 +5,10 @@ import HistoricalModal from "../components/tools/HistoricalModal"; // Import the
 import { GrChapterNext } from "react-icons/gr";
 import { GrChapterPrevious } from "react-icons/gr";
 import { DirectionButton2 } from "../components/d-button";
+import ClipLoader from "react-spinners/ClipLoader";
+import backendURL from "../config";
 
 const HistoricalPeople = () => {
-  const backendURL =
-    import.meta.env.MODE === "production"
-      ? import.meta.env.VITE_BACKEND_URL
-      : "http://localhost:8080";
-
   const dispatch = useDispatch();
   const { historicalPeople, loading, error } = useSelector(
     (state) => state.historicalPeople
@@ -100,7 +97,11 @@ const HistoricalPeople = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-100 z-50">
+        <ClipLoader color="#36D7B7" loading={true} size={100} />
+      </div>
+    );
   }
 
   if (error) {

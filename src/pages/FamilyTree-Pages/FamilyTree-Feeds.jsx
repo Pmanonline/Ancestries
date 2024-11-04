@@ -615,11 +615,7 @@ import {
 import { calculateBirthdayCountdown } from "../../components/tools/birthdayCountdown";
 import noProfile from "../../assets/images/noProfile.png";
 import BirthdayFrame from "../../assets/images/birthdayFrame.png";
-
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
+import backendURL from "../../config";
 
 const BirthdayCard = styled(Card)(({ theme }) => ({
   backgroundImage: `url(${BirthdayFrame})`,

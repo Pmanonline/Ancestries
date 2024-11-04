@@ -355,12 +355,7 @@ import {
   editPerson,
 } from "../../features/UserFeature/UserAction";
 import PersonalForm from "../../components/Forms/personalForm";
-import { invalidateCache } from "../../features/UserFeature/UserSlice";
-
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
+import backendURL from "../../config";
 
 const style = {
   position: "absolute",
@@ -399,7 +394,6 @@ function ChildModal({ initialState, onSubmit, userId }) {
   useEffect(() => {
     if (Esuccess) {
       toast.success("Saved!!");
-      dispatch(invalidateCache());
       dispatch(fetchAllDetails(userId));
       dispatch(resetEditState());
       handleClose();
@@ -486,7 +480,6 @@ export const NestedModal = React.forwardRef(({ userId }, ref2) => {
     if (Dsuccess) {
       toast.success("Deleted!");
       dispatch(resetDeleteState());
-      dispatch(invalidateCache());
       dispatch(fetchAllDetails(userId));
     }
   }, [Dsuccess, dispatch, userId]);
@@ -525,7 +518,6 @@ export const NestedModal = React.forwardRef(({ userId }, ref2) => {
       toast.success("Image uploaded successfully!");
       setImagePreview(null);
       setSelectedFile(null);
-      dispatch(invalidateCache());
       dispatch(fetchAllDetails(userId));
     } catch (error) {
       toast.error("Failed to upload image");
@@ -588,7 +580,6 @@ export const NestedModal = React.forwardRef(({ userId }, ref2) => {
                       <ChildModal
                         initialState={personData}
                         onSubmit={() => {
-                          dispatch(invalidateCache());
                           dispatch(fetchAllDetails(userId));
                         }}
                         userId={userId}

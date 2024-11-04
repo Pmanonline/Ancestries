@@ -1,20 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchNameDetails } from "../features/nameFeature/nameAction";
 import Spinner from "../components/tools/Spinner";
-import CardImage2 from "../assets/images/nameMeaning.png";
-import CultureImage from "../assets/images/stateAndcultureImage1.png";
-import { RiArrowDropDownLine } from "react-icons/ri";
 import { DirectionButton2 } from "../components/d-button";
 import { NameProfileCard } from "../components/Cards/NameProfileCard";
-import { Link } from "react-router-dom";
 import NoResult from "../assets/images/noResult.png";
-
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
+import CardImage2 from "../assets/images/nameMeaning.png";
+import CultureImage from "../assets/images/stateAndcultureImage1.png";
+import { ClipLoader } from "react-spinners";
+import backendURL from "../config";
+import {
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Box,
+  Grid,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+} from "@mui/material";
+import { RiArrowDropDownLine } from "react-icons/ri";
 
 function NameDetails() {
   const { name } = useParams();
@@ -45,7 +53,7 @@ function NameDetails() {
       setIsSearching(true);
       try {
         const response = await fetch(
-          `${backendURL}/api/searchUser?query=${newValue}`
+          `${backendURL}/api/searchUser ?query=${newValue}`
         );
         const data = await response.json();
         setSearchResults(data.names);
@@ -61,101 +69,101 @@ function NameDetails() {
   };
 
   const handleSelectName = (selectedName) => {
-    // Update recent searches only when a name is selected
-    const updatedSearches = [selectedName, ...recentSearches].slice(
-      0,
-      MAX_RECENT_SEARCHES
-    ); // Keep only the last MAX_RECENT_SEARCHES
+    const updatedSearches = [selectedName, ...recentSearches].slice(0, 3);
     setRecentSearches(updatedSearches);
     localStorage.setItem("recentSearches", JSON.stringify(updatedSearches));
 
-    // Navigate to the selected name details page
     navigate(`/names/${encodeURIComponent(selectedName)}`);
     setSurname("");
   };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     if (surname.trim()) {
-      // Optionally, you can navigate or perform other actions
       navigate(`/names/${encodeURIComponent(surname)}`);
     }
   };
 
-  const MAX_RECENT_SEARCHES = 3;
-
-  if (loading) return <Spinner />;
-  if (error) return <p>Error: {error}</p>;
-  if (!specificName) return <p>No details found for the specified name.</p>;
+  if (loading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-100 z-50">
+        <ClipLoader color="#36D7B7" loading={true} size={100} />;
+      </div>
+    );
+  }
+  if (error) return <Typography color="error">Error: {error}</Typography>;
+  if (!specificName)
+    return <Typography>No details found for the specified name.</Typography>;
 
   return (
-    <div className="mx-auto px-4 py-8">
-      <h2 className="text-black mb-9 text-2xl mod:text-xl font-bold uppercase font-Montserrat text-center">
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Typography variant="h3" align="center" gutterBottom>
         About {specificName.name}
-      </h2>
-      <div>
-        <h3 className="text-black my-4 text-lg mod:text-sm font-bold uppercase text-start">
+      </Typography>
+
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6" gutterBottom>
           Meaning
-        </h3>
-        <div className="mb-8">
-          <p>{specificName.meaning}</p>
-        </div>
-      </div>
-      <h3 className="text-black my-4 text-lg mod:text-sm font-bold uppercase text-start">
-        Background
-      </h3>
-      <div className="flex flex-col lg:flex-row mb-8">
-        <div className="lg:w-3/5 pr-4 mb-4 lg:mb-0">
-          <p>{specificName.background}</p>
-        </div>
-        <div className="lg:w-2/5 flex justify-center relative overflow-hidden bg-transparent shadow-none bg-clip-border">
-          <img
-            src={CardImage2}
-            alt="Sample"
-            className="w-[90%] border border-gray-300 rounded-sm"
-          />
-          <div className="absolute top-[6rem] left-0 w-full h-full flex items-center justify-center"></div>
-        </div>
-      </div>
-      <div>{/* <p>{specificName.background}</p> */}</div>
-      <h3 className="text-black mb-4 mt-12 text-lg mod:text-sm font-bold uppercase text-start">
-        Tribes that use {specificName.name}
-      </h3>
-      <div className="mb-8">
-        <p>{specificName.tribeDescribe}</p>
-      </div>
-      <IlajeContent />
-      <div className="h-[0.5px] bg-gray-400 w-full mb-4"></div>
-      {/* Other extensions */}
-      <div className="mt-24">
-        <h3 className="text-black my-4 text-lg mod:text-sm font-bold uppercase text-start">
+        </Typography>
+        <Typography>{specificName.meaning}</Typography>
+      </Paper>
+
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6" gutterBottom>
+          Background
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={8}>
+            <Typography>{specificName.background}</Typography>
+          </Grid>
+          <Grid item xs={12} md={4} display="flex" justifyContent="center">
+            <img
+              src={CardImage2}
+              alt="Sample"
+              className="w-full border border-gray-300 rounded-sm"
+            />
+          </Grid>
+        </Grid>
+      </Paper>
+
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6" gutterBottom>
+          Tribes that use {specificName.name}
+        </Typography>
+        <Typography>{specificName.tribeDescribe}</Typography>
+      </Paper>
+
+      <IlajeContent specificName={specificName} />
+
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6" gutterBottom>
           OTHER EXTENSIONS OF {specificName.name}
-        </h3>
-
+        </Typography>
         {specificName.extensions && specificName.extensions.length > 0 && (
-          <div>
+          <List>
             {specificName.extensions.map((extension) => (
-              <div className="mb-8 mx-4" key={extension._id}>
-                <p>
-                  <span className="inline-block ml-[-0.4rem] text-sm font-bold mr-2 list-disc">
-                    {extension.extensionName}
-                  </span>
-                  {extension.description}
-                </p>
-              </div>
+              <ListItem key={extension._id}>
+                <ListItemText
+                  primary={
+                    <span className="inline-block ml-[-0.4rem] text-sm font-bold mr-2 list-disc">
+                      {extension.extensionName}
+                    </span>
+                  }
+                  secondary={extension.description}
+                />
+              </ListItem>
             ))}
-          </div>
+          </List>
         )}
-      </div>
-      {/* Cards */}
-      <div className="mt-24">
-        <h3 className="text-black my-4 text-lg mod:text-sm font-bold text-start">
+      </Paper>
+
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6" gutterBottom>
           Great people bearing this name
-        </h3>
-
+        </Typography>
         <NameProfileCard />
-      </div>
+      </Paper>
 
-      {/* Search Form */}
       <div className="mt-24">
         <h4 className="text-black my-4 text-sm font-bold text-center">
           Don't Find What You Are Looking For?
@@ -164,7 +172,7 @@ function NameDetails() {
           Should lead to more on culture and town, religion, tribe family
           photograph, highlight position of people on the photo
         </p>
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center mt-5">
           <form
             onSubmit={handleSubmit}
             className="flex flex-col sm:flex-row items-center w-full sm:w-auto"
@@ -201,7 +209,7 @@ function NameDetails() {
               </div>
             </div>
           )}
-          {searchResults.length > 0 && (
+          {searchResults?.length > 0 && (
             <div className="text-center mt-4">
               <p className="text-lg mb-2">Related Searches</p>
               <div className="flex flex-wrap justify-center space-x-2">
@@ -218,126 +226,106 @@ function NameDetails() {
             </div>
           )}
         </div>
-
-        {/* Recent Searches */}
-        <div className="mt-24 mx-4">
-          <h3 className="text-black my-4 text-lg mod:text-sm font-bold text-start mb-3">
-            Recent Searches
-          </h3>
-          <ul className="">
-            {recentSearches.length > 0 ? (
-              recentSearches.map((search, index) => (
-                <li key={index} className="mb-2">
-                  {search}
-                </li>
-              ))
-            ) : (
-              <li>No recent searches</li>
-            )}
-          </ul>
-        </div>
       </div>
-    </div>
+
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="h6" gutterBottom>
+          Recent Searches
+        </Typography>
+        <List>
+          {recentSearches.length > 0 ? (
+            recentSearches.map((search, index) => (
+              <ListItem key={index}>{search}</ListItem>
+            ))
+          ) : (
+            <ListItem>No recent searches</ListItem>
+          )}
+        </List>
+      </Box>
+    </Container>
   );
 }
+
 export default NameDetails;
-export function IlajeContent() {
+
+export function IlajeContent({ specificName }) {
   const [activeState, setActiveState] = useState(null);
   const [activeTribe, setActiveTribe] = useState(null);
-  const { specificName, loading, error } = useSelector((state) => state.name);
 
   const toggleStateContent = (stateName) => {
     setActiveState(activeState === stateName ? null : stateName);
-    setActiveTribe(null); // Reset activeTribe when changing state
+    setActiveTribe(null);
   };
 
   const toggleTribeContent = (tribeName) => {
     setActiveTribe(activeTribe === tribeName ? null : tribeName);
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
-
   return (
-    <>
-      {specificName?.states?.map((state) => (
+    <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+      <Typography variant="h6" gutterBottom>
+        Tribes that use {specificName.name}
+      </Typography>
+      {specificName.states?.map((state) => (
         <div key={state.stateName}>
-          {/* State dropdown starts */}
-          <div className="flex justify-start ml-7 mb-5">
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => toggleStateContent(state.stateName)}
-                className="flex  justify-between px-5 w-[19rem] py-3 mt-1  rounded-full bg-opacity-90 bg-[#e7fae7]  sm:text-md font-bold "
-              >
-                <li className=" list-none">{state.stateName}</li>
-                <RiArrowDropDownLine
-                  className={`h-5 w-5 ml-2 ${
-                    activeState === state.stateName
-                      ? "transform rotate-180"
-                      : ""
-                  }`}
-                />
-              </button>
-            </div>
-          </div>
-          {/* Extended State Content */}
+          <Button
+            onClick={() => toggleStateContent(state.stateName)}
+            sx={{ width: "100%", mb: 2 }}
+          >
+            <Typography variant="body1">{state.stateName}</Typography>
+            <RiArrowDropDownLine
+              sx={{
+                transform:
+                  activeState === state.stateName ? "rotate(180deg)" : "",
+              }}
+            />
+          </Button>
           {activeState === state.stateName && (
-            <>
+            <div>
               {state.tribes?.map((tribe) => (
-                <div key={tribe.tribeName} className="ml-10">
-                  {/* Tribe dropdown starts */}
-                  <div className="flex justify-start ml-7 mb-5">
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => toggleTribeContent(tribe.tribeName)}
-                        className="flex justify-between px-5 w-[19rem] py-3 mt-1 rounded-full bg-opacity-90 sm:text-sm font-semibold"
-                      >
-                        <li>{tribe.tribeName}</li>
-                        <RiArrowDropDownLine
-                          className={`h-5 w-5 ml-2 ${
-                            activeTribe === tribe.tribeName
-                              ? "transform rotate-180"
-                              : ""
-                          }`}
-                        />
-                      </button>
-                    </div>
-                  </div>
-                  {/* Extended Tribe Content */}
+                <div key={tribe.tribeName}>
+                  <Button
+                    onClick={() => toggleTribeContent(tribe.tribeName)}
+                    sx={{ width: "100%", mb: 2 }}
+                  >
+                    <Typography variant="body1">{tribe.tribeName}</Typography>
+                    <RiArrowDropDownLine
+                      sx={{
+                        transform:
+                          activeTribe === tribe.tribeName
+                            ? "rotate(180deg)"
+                            : "",
+                      }}
+                    />
+                  </Button>
                   {activeTribe === tribe.tribeName && (
-                    <>
-                      <div className="my-8">
-                        <p>{tribe.description}</p>
-                      </div>
-                      {/* searchMore Button */}
-                      <div className="flex justify-center">
-                        <Link to="/genealogy">
-                          <button className="bg-green text-white py-2 px-6 hover:bg-green-600 flex rounded-2xl">
-                            View more on State and Culture
-                            <span className="mx-2">
-                              <DirectionButton2 />
-                            </span>
-                          </button>
-                        </Link>
-                      </div>
-                      {/* image */}
+                    <div>
+                      <Typography variant="body1">
+                        {tribe.description}
+                      </Typography>
+                      <Link to="/genealogy">
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          sx={{ width: "100%", mt: 2 }}
+                        >
+                          View more on State and Culture
+                          <DirectionButton2 sx={{ ml: 1 }} />
+                        </Button>
+                      </Link>
                       <img
                         src={tribe.image || CultureImage}
                         alt={tribe.tribeName}
-                        className="w-full my-7"
+                        sx={{ width: "100%", mt: 2 }}
                       />
-                    </>
+                    </div>
                   )}
-                  {/* Tribe dropdown ends */}
                 </div>
               ))}
-            </>
+            </div>
           )}
-          {/* State dropdown ends */}
         </div>
       ))}
-    </>
+    </Paper>
   );
 }

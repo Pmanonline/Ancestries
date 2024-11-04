@@ -1,11 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 import { getRequest } from "../../features/chatFeature/chatActions";
 import { ChatContext } from "../../components/context/chatContext";
-
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
+import backendURL from "../../config";
 
 function useFetchLatestMessage(chat, newMessage, notifications) {
   const { currentChat, socket } = useContext(ChatContext);

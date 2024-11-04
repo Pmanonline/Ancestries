@@ -11,11 +11,7 @@ import {
   PostRequest,
 } from "../../features/chatFeature/chatActions";
 import { io } from "socket.io-client";
-
-const backendURL =
-  import.meta.env.MODE === "production"
-    ? import.meta.env.VITE_BACKEND_URL
-    : "http://localhost:8080";
+import backendURL from "../../config";
 
 export const ChatContext = createContext();
 
@@ -41,7 +37,7 @@ export const ChatContextProvider = ({ children, user, chat }) => {
   // initializie socket
 
   useEffect(() => {
-    const newSocket = io("http://localhost:8080");
+    const newSocket = io(backendURL);
     setSocket(newSocket);
 
     return () => {

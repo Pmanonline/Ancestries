@@ -20,11 +20,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { MdOutlineAddAPhoto } from "react-icons/md";
 import YearDeceasedModal from "../../components/tools/yearDeseased";
-
-const backendURL =
-  process.env.NODE_ENV !== "production"
-    ? "http://localhost:8080"
-    : "https://gekoda-api.onrender.com";
+import backendURL from "../../config";
 
 const FatherForm = ({ initialState = {}, isEdit = false }) => {
   const [formData, setFormData] = useState({
